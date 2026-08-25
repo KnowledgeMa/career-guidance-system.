@@ -1,0 +1,59 @@
+<header class="topbar">
+    <div class="topbar-left">
+        <button class="icon-button mobile-menu-btn" onclick="openMobileMenu()" aria-label="Open sidebar menu" id="mobileMenuBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="4" x2="20" y1="6" y2="6"/>
+                <line x1="4" x2="20" y1="12" y2="12"/>
+                <line x1="4" x2="20" y1="18" y2="18"/>
+            </svg>
+        </button>
+        <button class="icon-button" onclick="toggleSidebar()" id="sidebarToggle" aria-label="Toggle sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="18" height="18" x="3" y="3" rx="2"/>
+                <path d="M9 3v18"/>
+            </svg>
+        </button>
+        <span class="topbar-title"><%= pageTitle || title || 'Dashboard' %></span>
+    </div>
+
+    <div class="topbar-actions">
+        <div class="dropdown">
+            <button class="icon-button" onclick="toggleDropdown('notifDropdown')" type="button" aria-haspopup="true" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                </svg>
+                <span class="notification-badge">3</span>
+            </button>
+            <div id="notifDropdown" class="dropdown-content" style="width: 300px;">
+                <div class="dropdown-label">Notifications</div>
+                <div class="dropdown-separator"></div>
+                <div class="dropdown-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                    <span style="font-weight:500;font-size:0.8125rem">Welcome to DCGS!</span>
+                    <span style="font-size:0.75rem;color:hsl(var(--muted-foreground))">Get started on your career journey</span>
+                </div>
+                <div class="dropdown-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                    <span style="font-weight:500;font-size:0.8125rem">Upload your matric results</span>
+                    <span style="font-size:0.75rem;color:hsl(var(--muted-foreground))">Needed to calculate your APS score</span>
+                </div>
+                <div class="dropdown-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                    <span style="font-weight:500;font-size:0.8125rem">Take the career assessment</span>
+                    <span style="font-size:0.75rem;color:hsl(var(--muted-foreground))">Discover your RIASEC profile</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="avatar avatar-sm" onclick="toggleDropdown('topbarUserDropdown')" type="button" aria-haspopup="true" aria-expanded="false" style="cursor:pointer;border:none">
+                <%= user && user.first_name ? user.first_name[0].toUpperCase() : user && user.email ? user.email[0].toUpperCase() : 'U' %>
+            </button>
+            <div id="topbarUserDropdown" class="dropdown-content">
+                <div class="dropdown-label">My Account</div>
+                <div class="dropdown-separator"></div>
+                <a href="/profile" class="dropdown-item">Profile</a>
+                <div class="dropdown-separator"></div>
+                <a href="#" class="dropdown-item danger" onclick="logout(); return false;">Sign Out</a>
+            </div>
+        </div>
+    </div>
+</header>

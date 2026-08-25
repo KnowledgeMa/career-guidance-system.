@@ -1,0 +1,864 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Profile' %> - DCGS</title>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 245 58% 51%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96%;
+            --secondary-foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222.2 84% 4.9%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --success: 152 69% 31%;
+            --success-bg: 152 69% 92%;
+            --warning: 38 92% 50%;
+            --warning-bg: 48 96% 89%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 245 58% 51%;
+            --radius: 0.75rem;
+            --sidebar-width: 16rem;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 0 solid hsl(var(--border));
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: hsl(var(--background));
+            border-right: 1px solid hsl(var(--border));
+            z-index: 30;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.mobile-open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .sidebar-logo {
+            width: 2.25rem;
+            height: 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(245 58% 40%));
+            color: hsl(var(--primary-foreground));
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+        }
+
+        .sidebar-brand-sub {
+            font-size: 0.75rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 1px;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0.5rem;
+            overflow-y: auto;
+        }
+
+        .sidebar-content::-webkit-scrollbar { width: 4px; }
+        .sidebar-content::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 2px; }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sidebar-menu-button {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.625rem;
+            font-size: 0.95rem;
+            text-decoration: none;
+            color: hsl(var(--foreground));
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+
+        .sidebar-menu-button:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .sidebar-menu-button.active {
+            background-color: hsl(var(--accent));
+            font-weight: 600;
+            color: hsl(var(--primary));
+        }
+
+        .sidebar-menu-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-menu-button svg {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav-badge {
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .sidebar-user:hover { background-color: hsl(var(--accent)); }
+
+        .avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(245 58% 40%));
+            color: hsl(var(--primary-foreground));
+            font-weight: 700;
+        }
+
+        .avatar-sm { width: 2rem; height: 2rem; font-size: 0.75rem; }
+        .avatar-md { width: 2.25rem; height: 2.25rem; font-size: 0.875rem; }
+
+        .user-info { display: flex; flex-direction: column; min-width: 0; }
+
+        .user-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.expanded { margin-left: 0; }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0 1.5rem;
+            height: 4.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .topbar-title {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+        }
+
+        .icon-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
+            background-color: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            color: hsl(var(--foreground));
+            cursor: pointer;
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .icon-button:hover { background-color: hsl(var(--accent)); }
+
+        .dropdown-content {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            width: 220px;
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.75rem;
+            box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12);
+            padding: 0.75rem 0;
+            display: none;
+            z-index: 50;
+        }
+
+        .dropdown-content.show { display: block; }
+
+        .dropdown-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            color: hsl(var(--muted-foreground));
+            padding: 0 1rem 0.5rem;
+        }
+
+        .dropdown-separator {
+            height: 1px;
+            background: hsl(var(--border));
+            margin: 0.5rem 0;
+        }
+
+        .dropdown-item,
+        .dropdown-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            color: hsl(var(--foreground));
+            text-decoration: none;
+            font-size: 0.925rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item button:hover { background: hsl(var(--accent)); }
+
+        .dropdown-item.danger,
+        .dropdown-item button.danger { color: hsl(var(--destructive)); }
+
+        .dashboard-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .dashboard-subtitle {
+            color: hsl(var(--muted-foreground));
+            max-width: 56rem;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .button-outline {
+            color: hsl(var(--foreground));
+            background: transparent;
+            border-color: hsl(var(--border));
+        }
+
+        .button-outline:hover { background: hsl(var(--accent)); }
+
+        .button-primary {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .button-primary:hover { background: hsl(var(--primary-dark)); }
+
+        .page-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: hsl(var(--foreground));
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.95rem 1rem;
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.75rem;
+            background: hsl(var(--card));
+            color: hsl(var(--foreground));
+            font-size: 0.95rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: hsl(var(--primary));
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        .input-hint {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.8rem;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .btn-primary {
+            padding: 0.95rem 1.5rem;
+            border-radius: 0.75rem;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+        }
+
+        .btn-secondary {
+            padding: 0.95rem 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid hsl(var(--border));
+            background: hsl(var(--card));
+            color: hsl(var(--foreground));
+        }
+
+        .btn-danger {
+            background: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+            border: none;
+        }
+
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            animation: slideIn 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success { background: #dcfce7; color: #064e3b; border: 1px solid #bbf7d0; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert.hidden { display: none; }
+
+        .completion-card {
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+            color: hsl(var(--primary-foreground));
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .completion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .completion-title { font-weight: 700; }
+        .completion-percent { font-size: 1.5rem; font-weight: 700; }
+
+        .completion-bar {
+            width: 100%;
+            height: 0.75rem;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .completion-fill {
+            height: 100%;
+            width: 0;
+            background: hsl(var(--primary-foreground));
+            border-radius: 9999px;
+            transition: width 0.4s ease;
+        }
+
+        .completion-hint { color: rgba(255,255,255,0.85); font-size: 0.9rem; }
+
+        .password-section {
+            background: #fff1f2;
+            border: 1px solid #fecaca;
+            border-radius: 0.75rem;
+            padding: 2rem;
+        }
+
+        .password-section h3 { color: #991b1b; margin-bottom: 1rem; }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 9999px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .mobile-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+            z-index: 25;
+        }
+
+        .mobile-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu-btn { display: none; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .topbar, .dashboard-content { padding-left: 1rem; padding-right: 1rem; }
+            .dashboard-title { font-size: 1.375rem; }
+            .mobile-menu-btn { display: inline-flex !important; }
+            .btn { width: 100%; }
+        }
+    </style>
+    <link rel="stylesheet" href="/css/student_dashboard_sidebar.css">
+</head>
+<body>
+    <div class="app-container">
+        <%- include('../partials/sidebar', { user: user, activePage: 'profile' }) %>
+
+        <main class="main-content" id="mainContent">
+            <%- include('../partials/topbar', { user: user, pageTitle: 'Profile Settings' }) %>
+
+            <div class="dashboard-content">
+                <div class="dashboard-header">
+                    <div>
+                        <h2 class="dashboard-title">Profile Settings</h2>
+                        <p class="dashboard-subtitle">Update your personal information and academic details.</p>
+                    </div>
+                    <div class="dashboard-actions">
+                        <a href="/dashboard" class="button button-outline button-sm">Back to Dashboard</a>
+                        <a href="/recommendations" class="button button-primary button-sm">View Recommendations</a>
+                    </div>
+                </div>
+
+                <section class="page-section page-card">
+                    <div class="section-title">Personal Profile</div>
+                    <div class="alert alert-success hidden" id="successAlert">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span id="successMessage">Profile updated successfully!</span>
+                    </div>
+                    <div class="alert alert-error hidden" id="errorAlert">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <span id="errorMessage">Failed to update profile. Please try again.</span>
+                    </div>
+
+                    <div class="completion-card">
+                        <div class="completion-header">
+                            <span class="completion-title">Profile Completion</span>
+                            <span class="completion-percent" id="completionPercent">0%</span>
+                        </div>
+                        <div class="completion-bar">
+                            <div class="completion-fill" id="completionFill" style="width: 0%"></div>
+                        </div>
+                        <p class="completion-hint" id="completionHint">Complete your profile to unlock personalized recommendations.</p>
+                    </div>
+
+                    <form id="profileForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="firstName" class="required">First Name</label>
+                                <input type="text" id="firstName" name="firstName" required minlength="2" maxlength="50">
+                                <span class="error-message">First name must be 2-50 characters</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName" class="required">Last Name</label>
+                                <input type="text" id="lastName" name="lastName" required minlength="2" maxlength="50">
+                                <span class="error-message">Last name must be 2-50 characters</span>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" disabled>
+                                <span class="input-hint">Email cannot be changed. Contact support if needed.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="grade" class="required">Current Grade/Status</label>
+                                <select id="grade" name="grade" required>
+                                    <option value="">Select grade...</option>
+                                    <option value="11">Grade 11</option>
+                                    <option value="12">Grade 12</option>
+                                    <option value="gap-year">Gap Year</option>
+                                    <option value="graduate">Recent Graduate</option>
+                                </select>
+                                <span class="error-message">Please select your grade</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="province" class="required">Province</label>
+                                <select id="province" name="province" required>
+                                    <option value="">Select province...</option>
+                                    <option value="EC">Eastern Cape</option>
+                                    <option value="FS">Free State</option>
+                                    <option value="GP">Gauteng</option>
+                                    <option value="KZN">KwaZulu-Natal</option>
+                                    <option value="LP">Limpopo</option>
+                                    <option value="MP">Mpumalanga</option>
+                                    <option value="NC">Northern Cape</option>
+                                    <option value="NW">North West</option>
+                                    <option value="WC">Western Cape</option>
+                                </select>
+                                <span class="error-message">Please select your province</span>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="school" class="required">School Name</label>
+                                <input type="text" id="school" name="school" required minlength="2" maxlength="100" placeholder="e.g., Durban High School">
+                                <span class="error-message">School name is required</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a href="/dashboard" class="button button-outline">Cancel</a>
+                            <button type="submit" class="button button-primary" id="saveBtn">
+                                <span id="btnText">Save Changes</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="page-section page-card password-section">
+                    <div class="section-title">Change Password</div>
+                    <p style="color: #7f1d1d; margin-bottom: 1rem;">Secure your account with a strong password.</p>
+                    <form id="passwordForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="currentPassword" class="required">Current Password</label>
+                                <input type="password" id="currentPassword" name="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword" class="required">New Password</label>
+                                <input type="password" id="newPassword" name="newPassword" required minlength="8">
+                                <span class="input-hint">Minimum 8 characters</span>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="button button-danger" id="passwordBtn">
+                                <span id="passwordBtnText">Update Password</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const userData = <%- JSON.stringify(user || {}) %>;
+
+        function initializeForm() {
+            if (userData.first_name) document.getElementById('firstName').value = userData.first_name;
+            if (userData.last_name) document.getElementById('lastName').value = userData.last_name;
+            if (userData.email) document.getElementById('email').value = userData.email;
+            if (userData.grade) document.getElementById('grade').value = userData.grade;
+            if (userData.province) document.getElementById('province').value = userData.province;
+            if (userData.school) document.getElementById('school').value = userData.school;
+
+            const initial = (userData.first_name || userData.email || 'U')[0].toUpperCase();
+            const navAvatar = document.getElementById('navAvatar');
+            if (navAvatar) navAvatar.textContent = initial;
+
+            const completion = userData.profile_completion || 0;
+            document.getElementById('completionPercent').textContent = completion + '%';
+            document.getElementById('completionFill').style.width = completion + '%';
+
+            if (completion === 100) {
+                document.getElementById('completionHint').textContent = 'Great! Your profile is complete.';
+            } else if (completion >= 50) {
+                document.getElementById('completionHint').textContent = 'Almost there! Upload your results to complete your profile.';
+            }
+        }
+
+        function toggleDropdown(id) {
+            if (!id) return;
+            const dropdown = document.getElementById(id);
+            if (!dropdown) return;
+            dropdown.classList.toggle('show');
+        }
+
+        function openMobileMenu() {
+            document.getElementById('mobileOverlay').classList.add('active');
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.add('mobile-open');
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('mobileOverlay').classList.remove('active');
+            document.getElementById('sidebar').classList.remove('mobile-open');
+        }
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+            }
+        });
+
+        async function logout() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        function showAlert(type, message) {
+            const alert = document.getElementById(type + 'Alert');
+            const msgSpan = document.getElementById(type + 'Message');
+            if (!alert || !msgSpan) return;
+            msgSpan.textContent = message;
+            alert.classList.remove('hidden');
+            setTimeout(() => alert.classList.add('hidden'), 5000);
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            const btnText = document.getElementById('btnText');
+            btn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const response = await fetch('/api/auth/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        firstName: document.getElementById('firstName').value,
+                        lastName: document.getElementById('lastName').value,
+                        grade: document.getElementById('grade').value,
+                        school: document.getElementById('school').value,
+                        province: document.getElementById('province').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('success', 'Profile updated successfully!');
+                    if (data.profile?.completion) {
+                        document.getElementById('completionPercent').textContent = data.profile.completion + '%';
+                        document.getElementById('completionFill').style.width = data.profile.completion + '%';
+                    }
+                } else {
+                    showAlert('error', data.error || 'Failed to update profile');
+                }
+            } catch (error) {
+                showAlert('error', 'Network error. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Save Changes';
+            }
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const btn = document.getElementById('passwordBtn');
+            const btnText = document.getElementById('passwordBtnText');
+            btn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div> Updating...';
+
+            try {
+                const response = await fetch('/api/auth/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        currentPassword: document.getElementById('currentPassword').value,
+                        newPassword: document.getElementById('newPassword').value
+                    })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('success', 'Password changed successfully!');
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    showAlert('error', data.error || 'Failed to change password');
+                }
+            } catch (error) {
+                showAlert('error', 'Network error. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Update Password';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', initializeForm);
+    </script>
+</body>
+</html>

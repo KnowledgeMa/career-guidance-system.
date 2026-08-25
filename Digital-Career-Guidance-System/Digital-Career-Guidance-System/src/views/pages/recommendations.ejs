@@ -1,0 +1,2138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Course Recommendations' %> - DCGS</title>
+    <meta name="csrf-token" content="<%= csrfToken || '' %>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables - Template Design System */
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 245 58% 51%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96%;
+            --secondary-foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222.2 84% 4.9%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --success: 152 69% 31%;
+            --success-bg: 152 69% 92%;
+            --warning: 38 92% 50%;
+            --warning-bg: 48 96% 89%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 245 58% 51%;
+            --radius: 0.75rem;
+            --sidebar-width: 16rem;
+        }
+
+        /* Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 0 solid hsl(var(--border));
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: hsl(var(--background));
+            border-right: 1px solid hsl(var(--border));
+            z-index: 10;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .sidebar-logo {
+            width: 2.25rem;
+            height: 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(245 58% 40%));
+            color: hsl(var(--primary-foreground));
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+        }
+
+        .sidebar-brand-sub {
+            font-size: 0.7rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 1px;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0.5rem;
+            overflow-y: auto;
+        }
+
+        .sidebar-content::-webkit-scrollbar { width: 4px; }
+        .sidebar-content::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 2px; }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sidebar-menu-button {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            text-decoration: none;
+            color: hsl(var(--foreground));
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s, color 0.15s;
+        }
+
+        .sidebar-menu-button:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .sidebar-menu-button.active {
+            background-color: hsl(var(--accent));
+            font-weight: 500;
+            color: hsl(var(--primary));
+        }
+
+        .sidebar-menu-left {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .sidebar-menu-button svg {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav-badge {
+            padding: 2px 7px;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .sidebar-user:hover { background-color: hsl(var(--accent)); }
+
+        .avatar {
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(245 58% 40%));
+            color: hsl(var(--primary-foreground));
+            font-weight: 600;
+        }
+
+        .avatar-sm { width: 2rem; height: 2rem; font-size: 0.75rem; }
+        .avatar-md { width: 2.25rem; height: 2.25rem; font-size: 0.875rem; }
+
+        .user-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+
+        .user-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: hsl(var(--muted-foreground));
+            text-transform: capitalize;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            overflow: auto;
+        }
+
+        /* Topbar */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.375rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: hsl(var(--foreground));
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .icon-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.375rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: hsl(var(--foreground));
+            transition: background-color 0.15s;
+        }
+
+        .icon-button:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .icon-button svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            padding: 1.5rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            margin-bottom: 2rem;
+        }
+
+        .welcome-card {
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)) 0%, hsl(245 58% 40%)) 100%;
+            color: hsl(var(--primary-foreground));
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .welcome-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-text h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+
+        .welcome-avatar {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        /* Course Cards Grid */
+        .courses-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        }
+
+        @media (max-width: 640px) {
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Course Card */
+        .course-card {
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--card));
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.875rem;
+            text-decoration: none;
+            color: hsl(var(--card-foreground));
+            cursor: pointer;
+            transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
+        }
+
+        .course-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: hsl(var(--primary) / 40%);
+            transform: translateY(-2px);
+        }
+
+        .course-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .course-card-icon {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 0.625rem;
+            background-color: hsl(var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.375rem;
+            transition: background-color 0.15s;
+        }
+
+        .course-card:hover .course-card-icon {
+            background-color: hsl(var(--primary));
+        }
+
+        .course-card-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .course-card-university {
+            font-size: 0.8125rem;
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 0.5rem;
+        }
+
+        .course-card-desc {
+            font-size: 0.8125rem;
+            color: hsl(var(--muted-foreground));
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .course-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.75rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .course-arrow {
+            color: hsl(var(--muted-foreground));
+            transition: transform 0.15s, color 0.15s;
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .course-card:hover .course-arrow {
+            transform: translateX(3px);
+            color: hsl(var(--primary));
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.1875rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .badge-eligible {
+            background: hsl(var(--success-bg));
+            color: hsl(var(--success));
+        }
+
+        .badge-conditional {
+            background: hsl(var(--warning-bg));
+            color: hsl(var(--warning));
+        }
+
+        .badge-ineligible {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+        }
+
+        .badge-missing {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+        }
+
+        /* APS Display */
+        .aps-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .aps-score {
+            font-weight: 600;
+            color: hsl(var(--primary));
+        }
+
+        /* Insights Panel */
+        .insights-panel {
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--card));
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .insights-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .insights-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            background: hsl(var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .insights-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .insights-content {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .insights-highlight {
+            background: hsl(var(--warning-bg));
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            color: hsl(var(--warning));
+            margin: 0.5rem 0;
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .loading-spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 2px solid hsl(var(--muted));
+            border-top-color: hsl(var(--primary));
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .empty-state-icon {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 1rem;
+            background: hsl(var(--muted));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state-desc {
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-options {
+            text-align: left;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: hsl(var(--background));
+            border-radius: 0.5rem;
+            border: 1px solid hsl(var(--border));
+        }
+
+        .empty-options-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: hsl(var(--foreground));
+        }
+
+        .empty-options-list {
+            margin-left: 1.5rem;
+        }
+
+        .empty-options-list li {
+            margin-bottom: 0.5rem;
+            font-size: 0.8125rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        /* Load More Button */
+        .load-more-container {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .load-more-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .load-more-btn:hover:not(:disabled) {
+            background-color: hsl(var(--accent));
+        }
+
+        .load-more-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .load-more-btn .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: hsl(var(--primary-foreground));
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            flex-shrink: 0;
+        }
+
+        /* Scan Complete Message */
+        .scan-complete {
+            text-align: center;
+            color: hsl(var(--muted-foreground));
+            margin-top: 2rem;
+            font-style: italic;
+            font-size: 0.875rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Dropdown */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            z-index: 50;
+            min-width: 12rem;
+            background-color: hsl(var(--popover));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 0.5rem;
+            display: none;
+        }
+
+        .dropdown-content.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            color: hsl(var(--foreground));
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .dropdown-item.danger {
+            color: hsl(var(--destructive));
+        }
+
+        .dropdown-item.danger:hover {
+            background-color: hsl(var(--destructive) / 10%);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background-color: hsl(var(--card));
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            position: relative;
+        }
+
+        .modal-loading,
+        .modal-error {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 2rem;
+            background: rgba(255,255,255,0.95);
+            z-index: 10;
+            text-align: center;
+        }
+
+        .modal-loading .spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid hsl(var(--border));
+            border-top-color: hsl(var(--primary));
+            border-radius: 9999px;
+            animation: spin 1s linear infinite;
+        }
+
+        .modal-error {
+            color: hsl(var(--destructive));
+            font-weight: 600;
+        }
+
+        .modal-error button {
+            margin-top: 1rem;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .modal-title-section {
+            flex: 1;
+        }
+
+        .modal-title-section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-bottom: 0.25rem;
+        }
+
+        .modal-subtitle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .modal-faculty {
+            padding: 0.125rem 0.5rem;
+            background-color: hsl(var(--accent));
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .modal-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.375rem;
+            background: transparent;
+            border: none;
+            color: hsl(var(--muted-foreground));
+            cursor: pointer;
+            transition: background-color 0.15s, color 0.15s;
+        }
+
+        .modal-close:hover {
+            background-color: hsl(var(--accent));
+            color: hsl(var(--foreground));
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-section {
+            margin-bottom: 2rem;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-bottom: 1rem;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .overview-item {
+            padding: 1rem;
+            background-color: hsl(var(--accent));
+            border-radius: 0.5rem;
+        }
+
+        .overview-label {
+            font-size: 0.8125rem;
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 0.25rem;
+        }
+
+        .overview-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        .course-description {
+            color: hsl(var(--muted-foreground));
+            line-height: 1.6;
+            font-size: 0.875rem;
+        }
+
+        .requirements-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 640px) {
+            .requirements-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .requirement-card {
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background-color: hsl(var(--card));
+        }
+
+        .requirement-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .requirement-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            background-color: hsl(var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .requirement-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        .requirement-content {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.8125rem;
+        }
+
+        .aps-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .aps-main {
+            font-size: 0.9375rem;
+            color: hsl(var(--foreground));
+        }
+
+        .aps-note {
+            font-size: 0.8125rem;
+            color: hsl(var(--warning));
+            font-style: italic;
+        }
+
+        .subject-requirements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .subject-requirement {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            background-color: hsl(var(--accent));
+            border-radius: 0.375rem;
+        }
+
+        .subject-name {
+            font-weight: 500;
+            color: hsl(var(--foreground));
+        }
+
+        .subject-level {
+            font-size: 0.8125rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .subject-required {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            background-color: hsl(var(--success-bg));
+            color: hsl(var(--success));
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        .subject-optional {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            background-color: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        .career-outcomes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .career-outcome {
+            padding: 0.75rem;
+            background-color: hsl(var(--accent));
+            border-radius: 0.375rem;
+            color: hsl(var(--foreground));
+            font-size: 0.875rem;
+        }
+
+        .university-info {
+            background-color: hsl(var(--accent));
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .university-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .university-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .university-label {
+            font-weight: 500;
+            color: hsl(var(--foreground));
+            font-size: 0.875rem;
+        }
+
+        .university-link {
+            color: hsl(var(--primary));
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .university-link:hover {
+            text-decoration: underline;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1.5rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .modal-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid transparent;
+        }
+
+        .modal-btn.secondary {
+            background-color: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+            border-color: hsl(var(--border));
+        }
+
+        .modal-btn.secondary:hover {
+            background-color: hsl(var(--muted) / 80%);
+        }
+
+        .modal-btn.primary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .modal-btn.primary:hover {
+            background-color: hsl(var(--primary) / 90%);
+        }
+
+        /* Modal Animations */
+        .modal-overlay {
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 1.5rem 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .dashboard-subtitle {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 0.25rem;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ─── Buttons ─── */
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            white-space: nowrap;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            height: 2.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+            text-decoration: none;
+        }
+
+        .button svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+
+        .button-primary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .button-primary:hover { background-color: hsl(245 58% 44%); }
+
+        .button-outline {
+            background-color: hsl(var(--background));
+            border: 1px solid hsl(var(--input));
+            color: hsl(var(--foreground));
+        }
+
+        .button-outline:hover { background-color: hsl(var(--accent)); }
+
+        .button-sm { height: 2.125rem; padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+
+        /* ─── Topbar ─── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0 1.5rem;
+            height: 4.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .icon-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.375rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: hsl(var(--foreground));
+            transition: background-color 0.15s;
+        }
+
+        .icon-button:hover { background-color: hsl(var(--accent)); }
+
+        .icon-button svg { width: 1.125rem; height: 1.125rem; }
+
+        .topbar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -0.2rem;
+            right: -0.2rem;
+            min-width: 1.125rem;
+            height: 1.125rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            background-color: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+            font-size: 0.6875rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">D</div>
+                <div>
+                    <div class="sidebar-brand-name">DCGS</div>
+                    <div class="sidebar-brand-sub">Career Guidance</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-content">
+                <!-- DASHBOARD SIDE BAR MAIN -->
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="/dashboard" class="sidebar-menu-button">
+                            <div class="sidebar-menu-left">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+                                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                </svg>
+                                <span>Dashboard</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/upload" class="sidebar-menu-button">
+                            <div class="sidebar-menu-left">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                <span>Upload Results</span>
+                            </div>
+                            
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/recommendations" class="sidebar-menu-button active">
+                            <div class="sidebar-menu-left">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
+                                <span>Recommendations</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-menu-button" onclick="alert('Use the chat widget for now!'); return false;">
+                            <div class="sidebar-menu-left">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                                </svg>
+                                <span>AI Counselor</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/assessment" class="sidebar-menu-button">
+                            <div class="sidebar-menu-left">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                </svg>
+                                <span>Assessment</span>
+                            </div>
+                            
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/profile" class="sidebar-menu-button">
+                            <div class="sidebar-menu-left">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <span>Profile</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- ORIGINAL SIDE BAR MAIN -->
+                <ul class="sidebar-menu" style="display: none;">
+                    <li class="sidebar-menu-item">
+                        <a href="/dashboard" class="sidebar-menu-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+                                <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            </svg>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a href="/upload" class="sidebar-menu-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" x2="12" y1="15" y2="3"></line>
+                            </svg>
+                            <span>Upload Results</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a href="/recommendations" class="sidebar-menu-button active">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"></path>
+                            </svg>
+                            <span>Course Matches</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a href="/assessment" class="sidebar-menu-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="6"></circle>
+                                <circle cx="12" cy="12" r="2"></circle>
+                            </svg>
+                            <span>Career Assessment</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a href="#" class="sidebar-menu-button" onclick="alert('Use the widget for now!'); return false;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span>AI Counselor</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-menu-item">
+                        <a href="/profile" class="sidebar-menu-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- DASHBOARD SIDE BAR FOOTER -->
+            <div class="sidebar-footer">
+                <div class="dropdown">
+                    <div class="sidebar-user" onclick="toggleDropdown('userDropdown')">
+                        <div class="avatar avatar-sm"><%= user.first_name ? user.first_name[0].toUpperCase() : user.email[0].toUpperCase() %></div>
+                        <div class="user-info">
+                            <span class="user-name"><%= user.first_name ? user.first_name + ' ' + (user.last_name || '') : user.email.split('@')[0] %></span>
+                            <span class="user-role"><%= user.role %></span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:hsl(var(--muted-foreground));flex-shrink:0">
+                            <path d="m18 15-6-6-6 6"/>
+                        </svg>
+                    </div>
+                    <div id="userDropdown" class="dropdown-content" style="bottom: calc(100% + 0.5rem); top: auto;">
+                        <div class="dropdown-label">My Account</div>
+                        <div class="dropdown-separator"></div>
+                        <a href="/profile" class="dropdown-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Profile Settings
+                        </a>
+                        <div class="dropdown-separator"></div>
+                        <a href="#" class="dropdown-item danger" onclick="logout(); return false;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Sign Out
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ORIGINAL SIDE BAR FOOTER -->
+            <div class="sidebar-footer" style="display: none;">
+                <div class="sidebar-user">
+                    <div class="avatar">
+                        <div class="avatar-fallback"><%= user.first_name ? user.first_name[0] : user.email[0] %></div>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name"><%= user.first_name || 'Student' %></div>
+                        <div class="user-role"><%= user.role %></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <!-- Mobile hamburger -->
+                    <button class="icon-button mobile-menu-btn" onclick="openMobileMenu()" style="display:none" id="mobileMenuBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>
+                        </svg>
+                    </button>
+                    <!-- Desktop sidebar toggle -->
+                    <button class="icon-button" onclick="toggleSidebar()" id="sidebarToggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>
+                        </svg>
+                    </button>
+                    <span class="topbar-title">Course Matches</span>
+                </div>
+                
+                <div class="topbar-actions">
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="icon-button" onclick="toggleDropdown('notifDropdown')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                            </svg>
+                        </button>
+                        <div id="profile-dropdown" class="dropdown-content" style="width: 300px;">
+                            <!-- <div class="dropdown-label">Notifications</div> -->
+                            <div class="dropdown-separator"></div>
+                            <div class="dropdown-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                                <span style="font-weight:500;font-size:0.8125rem"><i class="fa-regular fa-handshake"></i> Welcome to DCGS!</span>
+                                <span style="font-size:0.75rem;color:hsl(var(--muted-foreground))">Get started on your career journey</span>
+                            </div>
+                            <div class="dropdown-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                                <span style="font-weight:500;font-size:0.8125rem"><i class="fa-solid fa-arrow-up-from-bracket"></i> Upload your matric results</span>
+                                <span style="font-size:0.75rem;color:hsl(var(--muted-foreground))">Needed to calculate your APS score</span>
+                            </div>
+                            <div class="dropdown-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                                <span style="font-weight:500;font-size:0.8125rem"><i class="fa-solid fa-brain"></i> Take the career assessment</span>
+                                <span style="font-size:0.75rem;color:hsl(var(--muted-foreground))">Discover your RIASEC profile</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Avatar -->
+                    <div class="dropdown">
+                        <button class="avatar avatar-sm" onclick="toggleDropdown('topbarUserDropdown')" style="cursor:pointer;border:none">
+                            <%= user.first_name ? user.first_name[0].toUpperCase() : user.email[0].toUpperCase() %>
+                        </button>
+                        <div id="topbarUserDropdown" class="dropdown-content">
+                            <div class="dropdown-label">My Account</div>
+                            <div class="dropdown-separator"></div>
+                            <a href="/profile" class="dropdown-item">Profile</a>
+                            <div class="dropdown-separator"></div>
+                            <a href="#" class="dropdown-item danger" onclick="logout(); return false;">Sign Out</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Welcome Section -->
+                <section class="welcome-section">
+                    <div class="dashboard-header">
+                        <div>
+                            <!-- <h2 class="dashboard-title">Dashboard</h2> -->
+                            <p class="dashboard-subtitle">Welcome back, <strong><%= user.first_name || 'Student' %></strong> — here's your career readiness overview.</p>
+                        </div>
+                        <div class="dashboard-actions">
+                            <a href="/upload" class="button button-outline button-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Upload Results
+                            </a>
+                            <a href="/assessment" class="button button-primary button-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                Take Assessment
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Insights Panel -->
+                <div id="insights-container"></div>
+
+                <!-- Loading State -->
+                <div class="loading-state" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Finding your best course matches...</p>
+                </div>
+
+                <!-- Courses Grid -->
+                <div class="courses-grid" id="courses-container"></div>
+
+                <!-- Load More -->
+                <div class="load-more-container">
+                    <button id="load-more-btn" class="load-more-btn" style="display: none;" onclick="loadMatches()">
+                        Load More Courses
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Course Details Modal -->
+        <div id="course-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div id="modal-loading" class="modal-loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Loading course details...</p>
+                </div>
+                <div id="modal-error" class="modal-error" style="display: none;"></div>
+                <div class="modal-header">
+                    <div class="modal-title-section">
+                        <h2 id="modal-course-title">Course Details</h2>
+                        <div class="modal-subtitle">
+                            <span id="modal-university-name"></span>
+                            <span class="modal-faculty" id="modal-faculty"></span>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeCourseModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Course Overview -->
+                    <div class="modal-section">
+                        <h3 class="section-title">Course Overview</h3>
+                        <div class="overview-grid">
+                            <div class="overview-item">
+                                <div class="overview-label">Duration</div>
+                                <div class="overview-value" id="modal-duration"></div>
+                            </div>
+                            <div class="overview-item">
+                                <div class="overview-label">NQF Level</div>
+                                <div class="overview-value" id="modal-nqf-level"></div>
+                            </div>
+                            <div class="overview-item">
+                                <div class="overview-label">Course Code</div>
+                                <div class="overview-value" id="modal-course-code"></div>
+                            </div>
+                        </div>
+                        <div class="course-description" id="modal-description"></div>
+                    </div>
+
+                    <!-- Admission Requirements -->
+                    <div class="modal-section">
+                        <h3 class="section-title">Admission Requirements</h3>
+                        <div class="requirements-grid">
+                            <div class="requirement-card">
+                                <div class="requirement-header">
+                                    <div class="requirement-icon"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+                                    <div class="requirement-title">APS Score</div>
+                                </div>
+                                <div class="requirement-content">
+                                    <div class="aps-info">
+                                        <div class="aps-main">Minimum APS: <strong id="modal-base-aps"></strong></div>
+                                        <div class="aps-note" id="modal-math-penalty" style="display: none;">
+                                            Mathematical Literacy penalty: +<span id="modal-penalty-points"></span> points
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="requirement-card">
+                                <div class="requirement-header">
+                                    <div class="requirement-icon"><i class="fa-regular fa-bookmark"></i></div>
+                                    <div class="requirement-title">Subject Requirements</div>
+                                </div>
+                                <div class="requirement-content">
+                                    <div id="modal-subject-requirements" class="subject-requirements-list">
+                                        <!-- Subject requirements will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Career Outcomes -->
+                    <div class="modal-section" id="career-outcomes-section" style="display: none;">
+                        <h3 class="section-title">Career Outcomes</h3>
+                        <div id="modal-career-outcomes" class="career-outcomes-list">
+                            <!-- Career outcomes will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- University Information -->
+                    <div class="modal-section">
+                        <h3 class="section-title">University Information</h3>
+                        <div class="university-info">
+                            <div class="university-details">
+                                <div class="university-item">
+                                    <span class="university-label">Institution:</span>
+                                    <span id="modal-full-university-name"></span>
+                                </div>
+                                <div class="university-item">
+                                    <span class="university-label">Province:</span>
+                                    <span id="modal-province"></span>
+                                </div>
+                                <div class="university-item">
+                                    <span class="university-label">APS Method:</span>
+                                    <span id="modal-aps-method"></span>
+                                </div>
+                                <div class="university-item" id="university-website-item" style="display: none;">
+                                    <span class="university-label">Website:</span>
+                                    <a id="modal-website" href="#" target="_blank" class="university-link">Visit Website</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="modal-btn secondary" onclick="closeCourseModal()">Close</button>
+                    <button class="modal-btn primary" id="modal-apply-btn" style="display: none;">Apply Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── State ────────────────────────────────────────────────────────────
+        let currentOffset = 0;
+        let isLoading = false;
+
+        // Server-rendered data
+        const userData = <%- JSON.stringify(user || {}) %>;
+
+        // ── CSRF helper ──────────────────────────────────────────────────────
+        function getCsrfToken() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? (meta.getAttribute('content') || '') : '';
+        }
+
+        // ── Authentication & Token Refresh ────────────────────────────────────
+        async function fetchWithAuth(url, options = {}) {
+            const headers = {
+                ...options.headers,
+                'x-csrf-token': getCsrfToken()
+            };
+
+            if (options.body instanceof FormData) {
+                delete headers['Content-Type'];
+            }
+
+            const tryRequest = async () => {
+                return fetch(url, {
+                    ...options,
+                    credentials: 'include',
+                    headers
+                });
+            };
+
+            let response = await tryRequest();
+
+            if (response.status === 401) {
+                const errorData = await response.json().catch(() => ({}));
+
+                if (errorData.code === 'TOKEN_EXPIRED' || errorData.error?.includes('expired')) {
+                    console.log('[AUTH] Access token expired, attempting refresh...');
+                    const refreshed = await refreshAccessToken();
+
+                    if (refreshed) {
+                        response = await tryRequest();
+                    } else {
+                        console.error('[AUTH] Token refresh failed, redirecting to login');
+                        window.location.href = '/?session=expired';
+                        return Promise.reject(new Error('Session expired'));
+                    }
+                }
+            }
+
+            return response;
+        }
+
+        async function refreshAccessToken() {
+            try {
+                const response = await fetch('/api/auth/refresh', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'x-csrf-token': getCsrfToken() }
+                });
+
+                if (response.ok) {
+                    console.log('[AUTH] Token refreshed successfully');
+                    return true;
+                } else {
+                    console.error('[AUTH] Token refresh failed:', await response.text());
+                    return false;
+                }
+            } catch (err) {
+                console.error('[AUTH] Refresh error:', err);
+                return false;
+            }
+        }
+
+        // ── Bootstrap (runs once DOM is ready) ──────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.dropdown')) {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    if (dropdown) dropdown.classList.remove('active');
+                }
+            });
+        });
+
+        // ── Nav helpers ──────────────────────────────────────────────────────
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            const isVisible = dropdown.classList.contains('active');
+            dropdown.classList.toggle('active', !isVisible);
+        }
+
+        async function logout() {
+            try {
+                const res = await fetchWithAuth('/api/auth/logout', {
+                    method: 'POST'
+                });
+                if (res.ok) window.location.href = '/';
+            } catch (err) {
+                console.error('Logout failed:', err);
+            }
+        }
+
+        // ── Render Course Card (Clean Design) ───────────────────────────────
+        function renderCourseCard(match) {
+            const isEligible = match.eligibility_status === 'ELIGIBLE';
+            const isConditional = match.eligibility_status === 'CONDITIONAL';
+            const isMissing = match.eligibility_status === 'MISSING_REQUIREMENTS';
+
+            // Determine badge style
+            let badgeClass = 'badge-missing';
+            if (isEligible) badgeClass = 'badge-eligible';
+            else if (isConditional) badgeClass = 'badge-conditional';
+            else if (isMissing) badgeClass = 'badge-missing';
+
+            // Get status text
+            const statusText = match.eligibility_status.replace('_', ' ');
+
+            // Build APS display
+            const apsComparison = match.calculated_aps;
+            let apsDisplay = '';
+            if (apsComparison?.final_aps) {
+                apsDisplay = `<div class="aps-display">
+                    <span>Your APS: <strong class="aps-score">${apsComparison.final_aps}</strong></span>
+                    ${apsComparison?.required_aps ? `<span>Required: ${apsComparison.required_aps}</span>` : ''}
+                </div>`;
+            }
+
+            // Build clean card with click handler
+            return `
+                <div class="course-card" onclick="openCourseModal('${match.course_id}')">
+                    <div class="course-card-top">
+                        <div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <span class="badge ${badgeClass}">${statusText}</span>
+                    </div>
+
+                    <div>
+                        <div class="course-card-title">${match.course_name}</div>
+                        <div class="course-card-university">${match.university_name || 'University'}</div>
+                        <p class="course-card-desc">${match.narrative_reason || 'This course matches your qualifications and interests.'}</p>
+                        ${apsDisplay}
+                    </div>
+
+                    <div class="course-card-footer">
+                        <span style="font-size:0.8125rem;color:hsl(var(--muted-foreground))">View details →</span>
+                        <svg class="course-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ── Render Insights Panel (Clean Design) ────────────────────────────
+        function renderInsights(categorized, studentSummary) {
+            const container = document.getElementById('insights-container');
+            if (!container) return;
+
+            let html = '<div class="insights-panel">';
+
+            // Header
+            html += `
+                <div class="insights-header">
+                    <div class="insights-icon"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+                    <div class="insights-title">Your Profile Summary</div>
+                </div>
+            `;
+
+            // Content
+            html += '<div class="insights-content">';
+
+            // APS Range
+            if (studentSummary?.aps_range) {
+                html += `<p><strong>Your APS Range:</strong> ${studentSummary.aps_range}</p>`;
+            }
+
+            // Math Status
+            const hasCoreMath = studentSummary?.has_core_math;
+            const hasTechMath = studentSummary?.has_tech_math;
+            const hasMathLit = studentSummary?.has_math_lit;
+
+            if (hasCoreMath) {
+                html += `
+                    <div class="insights-highlight">
+                        <i class="fa-regular fa-circle-check"></i> Core Mathematics detected - All courses available
+                    </div>
+                `;
+            } else if (hasTechMath) {
+                html += `
+                    <div class="insights-highlight">
+                        <i class="fa-solid fa-exclamation"></i> Technical Mathematics detected - Limited to specific faculties
+                    </div>
+                `;
+            } else if (hasMathLit) {
+                html += `
+                    <div class="insights-highlight">
+                        <i class="fa-solid fa-exclamation"></i> Mathematical Literacy detected - Many courses require core Mathematics
+                    </div>
+                `;
+            }
+
+            html += '</div></div>';
+            container.innerHTML = html;
+        }
+
+        // ── Render Empty State (Clean Design) ───────────────────────────────
+        function renderEmptyState(categorized, studentSummary) {
+            const container = document.getElementById('courses-container');
+
+            let html = '<div class="empty-state">';
+            html += '<div class="empty-state-icon"><i class="fa-solid fa-user-graduate"></i></div>';
+            html += '<h3 class="empty-state-title">No matching courses found</h3>';
+
+            const hasMathLit = studentSummary?.has_math_lit;
+            const hasCoreMath = studentSummary?.has_core_math;
+
+            if (hasMathLit && !hasCoreMath) {
+                html += `
+                    <p class="empty-state-desc">You have Mathematical Literacy, but most courses require core Mathematics.</p>
+                    <div class="empty-options">
+                        <div class="empty-options-title">Your Options:</div>
+                        <ul class="empty-options-list">
+                            <li>Upgrade to core Mathematics at a TVET college or night school</li>
+                            <li>Search for courses specifically accepting Mathematical Literacy</li>
+                            <li>Consider UNISA or distance learning programs with different requirements</li>
+                            <li>Explore Diploma programs with lower Math requirements</li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                html += '<p class="empty-state-desc">Try uploading your results or adjusting filters to see more options.</p>';
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ── Main Load Function ───────────────────────────────────────────────
+        async function loadMatches() {
+            if (isLoading) return;
+            isLoading = true;
+
+            const container = document.getElementById('courses-container');
+            const loading = document.getElementById('loading');
+            const loadBtn = document.getElementById('load-more-btn');
+
+            loading.style.display = 'block';
+            loading.innerHTML = `
+                <div class="loading-spinner"></div>
+                <p>${currentOffset === 0 ? 'Finding your best matches...' : 'Scanning more courses...'}</p>
+            `;
+            loadBtn.style.display = 'none';
+
+            try {
+                const res = await fetchWithAuth(`/api/recommendations/matches?limit=20&offset=${currentOffset}`, {
+                    credentials: 'include',
+                    headers: { 'x-csrf-token': getCsrfToken() }
+                });
+
+                if (!res.ok) {
+                    const error = await res.text();
+                    throw new Error(error || 'Failed to load matches');
+                }
+
+                const data = await res.json();
+
+                loading.style.display = 'none';
+                isLoading = false;
+
+                // Handle message (no results uploaded)
+                if (data.message) {
+                    renderEmptyState(data.categorized, data.student_summary);
+                    return;
+                }
+
+                // Handle empty matches after filtering
+                if (data.matches.length === 0 && currentOffset === 0) {
+                    renderEmptyState(data.categorized, data.student_summary);
+                    return;
+                }
+
+                // Render matches (eligible + conditional)
+                const matchesHtml = data.matches.map(renderCourseCard).join('');
+                container.innerHTML += matchesHtml;
+
+                // Render insights panel (only on first load)
+                if (currentOffset === 0) {
+                    renderInsights(data.categorized, data.student_summary);
+                }
+
+                currentOffset = data.nextOffset;
+
+                // Update load more button
+                if (data.hasMore) {
+                    loadBtn.style.display = 'inline-flex';
+                } else {
+                    loadBtn.style.display = 'none';
+                    if (currentOffset > 0) {
+                        container.insertAdjacentHTML('beforeend',
+                            '<p class="scan-complete">Finished scanning available courses.</p>'
+                        );
+                    }
+                }
+
+            } catch (err) {
+                console.error('Failed to load matches:', err);
+                loading.innerHTML = '<p>Error loading matches. Please refresh.</p>';
+                loading.style.color = 'hsl(var(--destructive))';
+                isLoading = false;
+            }
+        }
+
+        // ── Modal Functions ──────────────────────────────────────────────────
+        async function openCourseModal(courseId) {
+            console.log('[COURSE MODAL] Loading details for', courseId);
+            const modal = document.getElementById('course-modal');
+            const modalBody = modal.querySelector('.modal-body');
+            const modalFooter = modal.querySelector('.modal-footer');
+            const loadingOverlay = document.getElementById('modal-loading');
+            const errorBox = document.getElementById('modal-error');
+
+            errorBox.style.display = 'none';
+            errorBox.textContent = '';
+            loadingOverlay.style.display = 'flex';
+            modalBody.style.display = 'none';
+            if (modalFooter) modalFooter.style.display = 'none';
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const response = await fetchWithAuth(`/api/recommendations/course/${courseId}`);
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => 'Failed to load course details');
+                    throw new Error(`Failed to load course details (${response.status}): ${errorText}`);
+                }
+
+                const data = await response.json();
+                loadingOverlay.style.display = 'none';
+                modalBody.style.display = '';
+                if (modalFooter) modalFooter.style.display = '';
+                renderCourseModal(data);
+            } catch (error) {
+                console.error('Error loading course details:', error);
+                const message = error.message || 'Failed to load course details. Please try again.';
+                loadingOverlay.style.display = 'none';
+                errorBox.style.display = 'block';
+                errorBox.textContent = message;
+            }
+        }
+
+        function closeCourseModal() {
+            const modal = document.getElementById('course-modal');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        function renderCourseModal(data) {
+            const { course, university, requirements } = data;
+
+            // Update modal header
+            document.getElementById('modal-course-title').textContent = course.name;
+            document.getElementById('modal-university-name').textContent = university.name;
+            document.getElementById('modal-faculty').textContent = course.faculty;
+
+            // Update overview
+            document.getElementById('modal-duration').textContent = course.duration_years ? `${course.duration_years} years` : 'N/A';
+            document.getElementById('modal-nqf-level').textContent = course.nqf_level || 'N/A';
+            document.getElementById('modal-course-code').textContent = course.code || 'N/A';
+            document.getElementById('modal-description').textContent = course.description || 'No description available.';
+
+            // Update APS requirements
+            document.getElementById('modal-base-aps').textContent = requirements.base_min_aps;
+            const penaltyDiv = document.getElementById('modal-math-penalty');
+            const penaltyPoints = document.getElementById('modal-penalty-points');
+            if (requirements.math_lit_aps_penalty && requirements.math_lit_aps_penalty > 0) {
+                penaltyPoints.textContent = requirements.math_lit_aps_penalty;
+                penaltyDiv.style.display = 'block';
+            } else {
+                penaltyDiv.style.display = 'none';
+            }
+
+            // Update subject requirements
+            const subjectReqContainer = document.getElementById('modal-subject-requirements');
+            if (requirements.subject_requirements && requirements.subject_requirements.length > 0) {
+                const subjectHtml = requirements.subject_requirements.map(req => {
+                    const levelText = req.min_level ? `Level ${req.min_level}+` : 'Any level';
+                    const altText = req.alternative && req.alt_min_level ? ` or ${req.alternative} Level ${req.alt_min_level}+` : '';
+                    const requiredClass = req.required !== false ? 'subject-required' : 'subject-optional';
+                    const requiredText = req.required !== false ? 'Required' : 'Recommended';
+
+                    return `
+                        <div class="subject-requirement">
+                            <div>
+                                <div class="subject-name">${req.subject}${altText}</div>
+                                <div class="subject-level">${levelText}</div>
+                            </div>
+                            <span class="${requiredClass}">${requiredText}</span>
+                        </div>
+                    `;
+                }).join('');
+                subjectReqContainer.innerHTML = subjectHtml;
+            } else {
+                subjectReqContainer.innerHTML = '<p style="color: hsl(var(--muted-foreground)); font-style: italic;">No specific subject requirements listed.</p>';
+            }
+
+            // Update career outcomes
+            const careerSection = document.getElementById('career-outcomes-section');
+            const careerContainer = document.getElementById('modal-career-outcomes');
+            if (course.career_outcomes && course.career_outcomes.length > 0) {
+                const careerHtml = course.career_outcomes.map(outcome => `
+                    <div class="career-outcome">${outcome}</div>
+                `).join('');
+                careerContainer.innerHTML = careerHtml;
+                careerSection.style.display = 'block';
+            } else {
+                careerSection.style.display = 'none';
+            }
+
+            // Update university information
+            document.getElementById('modal-full-university-name').textContent = university.name;
+            document.getElementById('modal-province').textContent = university.province || 'N/A';
+            const websiteItem = document.getElementById('university-website-item');
+            const websiteLink = document.getElementById('modal-website');
+            const apsMethod = university.aps_calculation_method ? university.aps_calculation_method.replace(/_/g, ' ').toUpperCase() : 'N/A';
+            document.getElementById('modal-aps-method').textContent = apsMethod;
+
+            if (university.website) {
+                websiteLink.href = university.website;
+                websiteLink.textContent = university.website.replace(/^https?:\/\//, '');
+                websiteItem.style.display = 'flex';
+            } else {
+                websiteItem.style.display = 'none';
+            }
+        }
+
+        // ── Close modal on escape key ────────────────────────────────────────
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeCourseModal();
+            }
+        });
+
+        // ── Close modal when clicking overlay ───────────────────────────────
+        document.getElementById('course-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'course-modal') {
+                closeCourseModal();
+            }
+        });
+
+        // Initial Load
+        loadMatches();
+    </script>
+</body>
+</html>
+        

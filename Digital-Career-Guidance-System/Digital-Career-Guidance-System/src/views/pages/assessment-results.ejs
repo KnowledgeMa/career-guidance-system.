@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Your Career Profile' %> - DCGS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .btn-back:hover {
+            color: var(--primary);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Main Layout */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-light);
+        }
+
+        /* Profile Summary Card */
+        .profile-summary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            text-align: center;
+        }
+
+        .holland-code {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 1rem 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .holland-code-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .profile-description {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* RIASEC Chart */
+        .riasec-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+        }
+
+        .riasec-chart {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .riasec-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            background: var(--bg);
+            transition: transform 0.2s;
+        }
+
+        .riasec-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .riasec-item.highlight {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border: 2px solid var(--primary);
+        }
+
+        .riasec-letter {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .riasec-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .riasec-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .riasec-score-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .riasec-score-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        /* Career Matches */
+        .career-match {
+            display: flex;
+            align-items: center;
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .career-match:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .career-match-rank {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .career-match-info {
+            flex: 1;
+        }
+
+        .career-match-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .career-match-desc {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .career-match-score {
+            text-align: right;
+        }
+
+        .match-percentage {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .match-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .career-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .career-tag {
+            padding: 0.25rem 0.75rem;
+            background: var(--bg);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* Action Buttons */
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Loading State */
+        .loading-container {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-desc {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Strengths Section */
+        .strengths-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .strength-card {
+            padding: 1.5rem;
+            background: var(--bg);
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .strength-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .strength-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .strength-desc {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .holland-code {
+                font-size: 3rem;
+            }
+
+            .riasec-chart {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .career-match {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .career-match-score {
+                text-align: left;
+                margin-top: 0.75rem;
+                padding-top: 0.75rem;
+                border-top: 1px solid var(--border);
+                width: 100%;
+            }
+
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .strengths-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon">D</div>
+                DCGS
+            </a>
+            <div class="nav-right">
+                <a href="/dashboard" class="btn-back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Dashboard
+                </a>
+                <div class="user-avatar" id="navAvatar">U</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Loading State -->
+        <div id="loadingSection" class="loading-container">
+            <div class="loading-spinner"></div>
+            <h3>Loading Your Career Profile...</h3>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptySection" class="empty-state" style="display: none;">
+            <div class="empty-icon">📝</div>
+            <div class="empty-title">No Assessment Found</div>
+            <p class="empty-desc">Complete the career assessment to see your personalized profile.</p>
+            <a href="/assessment" class="btn btn-primary">Take Assessment</a>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" style="display: none;">
+            <div class="page-header">
+                <h1>Your Career Profile</h1>
+                <p>Based on your RIASEC assessment</p>
+            </div>
+
+            <!-- Profile Summary -->
+            <div class="profile-summary">
+                <div class="holland-code-label">Your Holland Code</div>
+                <div class="holland-code" id="hollandCode">--</div>
+                <p class="profile-description" id="profileDescription">
+                    Your personalized career analysis is ready.
+                </p>
+            </div>
+
+            <!-- RIASEC Scores -->
+            <div class="riasec-section">
+                <h2 class="section-title">RIASEC Scores</h2>
+                <div class="riasec-chart" id="riasecChart">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Top Career Matches -->
+            <div class="riasec-section">
+                <h2 class="section-title">Top Career Matches</h2>
+                <div id="careerMatches">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- AI Analysis -->
+            <div class="riasec-section" id="aiAnalysisSection">
+                <h2 class="section-title">AI Career Analysis</h2>
+                <div id="aiAnalysis">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-bar">
+                <a href="/recommendations" class="btn btn-primary">
+                    View Course Recommendations
+                </a>
+                <a href="/dashboard" class="btn btn-secondary">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load assessment results on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userData = <%- JSON.stringify(user || {}) %>;
+            document.getElementById('navAvatar').textContent =
+                (userData.first_name || userData.email || 'U')[0].toUpperCase();
+
+            await loadResults();
+        });
+
+        async function loadResults() {
+            try {
+                console.log('[AssessmentResults] Fetching latest assessment...');
+                const response = await fetch('/api/assessment/latest', {
+                    credentials: 'include'
+                });
+
+                console.log('[AssessmentResults] Response status:', response.status);
+                const data = await response.json();
+                console.log('[AssessmentResults] Response data:', data);
+
+                document.getElementById('loadingSection').style.display = 'none';
+
+                if (!data.data) {
+                    console.log('[AssessmentResults] No data received, showing empty state');
+                    document.getElementById('emptySection').style.display = 'block';
+                    return;
+                }
+
+                const assessment = data.data;
+                console.log('[AssessmentResults] Assessment received:', assessment);
+                console.log('[AssessmentResults] RIASEC Scores:', assessment.riasecScores);
+                console.log('[AssessmentResults] Dominant Code:', assessment.dominantCode);
+                console.log('[AssessmentResults] Career Matches:', assessment.careerMatches);
+
+                // Show results
+                document.getElementById('resultsSection').style.display = 'block';
+
+                // Update Holland Code
+                document.getElementById('hollandCode').textContent =
+                    assessment.dominantCode || '--';
+
+                // Update description
+                if (assessment.profileSummary) {
+                    document.getElementById('profileDescription').textContent =
+                        assessment.profileSummary;
+                }
+
+                // Render RIASEC chart
+                renderRIASECChart(assessment.riasecScores, assessment.dominantCode);
+
+                // Render career matches
+                renderCareerMatches(assessment.careerMatches || []);
+
+                // Render AI analysis
+                renderAIAnalysis(assessment);
+
+            } catch (error) {
+                console.error('Error loading results:', error);
+                document.getElementById('loadingSection').style.display = 'none';
+                document.getElementById('emptySection').style.display = 'block';
+            }
+        }
+
+        function renderRIASECChart(scores, dominantCode) {
+            const container = document.getElementById('riasecChart');
+
+            const dimensions = [
+                { code: 'R', name: 'Realistic' },
+                { code: 'I', name: 'Investigative' },
+                { code: 'A', name: 'Artistic' },
+                { code: 'S', name: 'Social' },
+                { code: 'E', name: 'Enterprising' },
+                { code: 'C', name: 'Conventional' }
+            ];
+
+            container.innerHTML = dimensions.map(dim => {
+                const score = scores?.[dim.code] || 0;
+                const isHighlighted = dominantCode?.includes(dim.code);
+
+                return `
+                    <div class="riasec-item ${isHighlighted ? 'highlight' : ''}">
+                        <div class="riasec-letter">${dim.code}</div>
+                        <div class="riasec-name">${dim.name}</div>
+                        <div class="riasec-score">${score}%</div>
+                        <div class="riasec-score-bar">
+                            <div class="riasec-score-fill" style="width: ${score}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderCareerMatches(matches) {
+            const container = document.getElementById('careerMatches');
+
+            if (matches.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-light);">No career matches found.</p>';
+                return;
+            }
+
+            container.innerHTML = matches.slice(0, 5).map((match, index) => {
+                const percentage = Math.round(match.matchScore * 100);
+
+                return `
+                    <div class="career-match">
+                        <div class="career-match-rank">${index + 1}</div>
+                        <div class="career-match-info">
+                            <div class="career-match-name">${match.name}</div>
+                            <div class="career-match-desc">${match.description?.substring(0, 100)}...</div>
+                            <div class="career-tags">
+                                <span class="career-tag">${match.salaryRange || 'Salary varies'}</span>
+                                <span class="career-tag">${match.growthPotential || 'Growth'} growth</span>
+                            </div>
+                        </div>
+
+                        <div class="career-match-score">
+                            <div class="match-percentage">${percentage}%</div>
+                            <div class="match-label">match</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAIAnalysis(assessment) {
+            const container = document.getElementById('aiAnalysis');
+
+            let html = '';
+
+            // Personality Narrative
+            if (assessment.personalityNarrative) {
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">
+                            Personality Profile
+                        </h3>
+                        <p style="color: var(--text-light); line-height: 1.7;">${assessment.personalityNarrative}</p>
+                    </div>
+                `;
+            }
+
+            // Work Style
+            if (assessment.workStyleDescription) {
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">
+                            Ideal Work Environment
+                        </h3>
+                        <p style="color: var(--text-light); line-height: 1.7;">${assessment.workStyleDescription}</p>
+                    </div>
+                `;
+            }
+
+            // Strengths
+            const strengths = assessment.strengthsAnalysis || {};
+            if (Object.keys(strengths).length > 0) {
+                html += `
+                    <div>
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Your Key Strengths</h3>
+                        <div class="strengths-grid">
+                            ${Object.entries(strengths).map(([key, value]) => `
+                                <div class="strength-card">
+                                    <div class="strength-icon">✨</div>
+                                    <div class="strength-title">${key}</div>
+                                    <div class="strength-desc">${value}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html || '<p style="text-align: center; color: var(--text-light);">AI analysis not available.</p>';
+        }
+    </script>
+</body>
+</html>

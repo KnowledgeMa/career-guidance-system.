@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Courses Management' %> - DCGS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --background: #ffffff;
+            --foreground: #0f172a;
+            --card: #ffffff;
+            --card-foreground: #0f172a;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --border: #e2e8f0;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-foreground: #ffffff;
+            --secondary: #f1f5f9;
+            --secondary-foreground: #0f172a;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --radius: 16px;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .header h1 {
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--foreground);
+        }
+
+        .filter-group select {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .table-container {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--muted);
+            font-weight: 600;
+            color: var(--foreground);
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: var(--muted);
+        }
+
+        .university-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: var(--info-light);
+            color: var(--info);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.375rem 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+        .btn-primary:hover { background: var(--primary-dark); }
+
+        .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .pagination .btn {
+            padding: 0.5rem 1rem;
+        }
+
+        .pagination span {
+            color: var(--muted-foreground);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Courses Management</h1>
+            <p>View and manage university courses available for recommendations.</p>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="university">University</label>
+                <select id="university" name="university">
+                    <option value="">All Universities</option>
+                    <% universities.forEach(uni => { %>
+                        <option value="<%= uni.id %>" <%= selectedUniversity == uni.id ? 'selected' : '' %>><%= uni.name %> (<%= uni.acronym %>)</option>
+                    <% }); %>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-primary" onclick="applyFilter()">Filter</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Course Name</th>
+                        <th>Code</th>
+                        <th>Faculty</th>
+                        <th>University</th>
+                        <th>NQF Level</th>
+                        <th>Career Outcomes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% courses.forEach(course => { %>
+                    <tr>
+                        <td><%= course.name %></td>
+                        <td><%= course.code %></td>
+                        <td><%= course.faculty %></td>
+                        <td><span class="university-badge"><%= course.university_name %> (<%= course.acronym %>)</span></td>
+                        <td><%= course.nqf_level %></td>
+                        <td><%= course.career_outcomes && Array.isArray(course.career_outcomes) && course.career_outcomes.length > 0 ? course.career_outcomes.join(', ').substring(0, 50) + '...' : 'N/A' %></td>
+                        <td class="actions">
+                            <button class="btn btn-secondary">View Details</button>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <% if (pagination.totalPages > 1) { %>
+        <div class="pagination">
+            <% if (pagination.hasPrev) { %>
+                <a href="?page=<%= pagination.currentPage - 1 %>&university=<%= selectedUniversity || '' %>" class="btn btn-primary">Previous</a>
+            <% } %>
+            <span>Page <%= pagination.currentPage %> of <%= pagination.totalPages %></span>
+            <% if (pagination.hasNext) { %>
+                <a href="?page=<%= pagination.currentPage + 1 %>&university=<%= selectedUniversity || '' %>" class="btn btn-primary">Next</a>
+            <% } %>
+        </div>
+        <% } %>
+    </div>
+
+    <script>
+        function applyFilter() {
+            const university = document.getElementById('university').value;
+            const params = new URLSearchParams(window.location.search);
+            if (university) {
+                params.set('university', university);
+            } else {
+                params.delete('university');
+            }
+            params.delete('page'); // Reset to page 1
+            window.location.search = params.toString();
+        }
+    </script>
+</body>
+</html>

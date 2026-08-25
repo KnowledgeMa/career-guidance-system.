@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Safety Flags Review' %> - DCGS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --background: #ffffff;
+            --foreground: #0f172a;
+            --card: #ffffff;
+            --card-foreground: #0f172a;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --border: #e2e8f0;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-foreground: #ffffff;
+            --secondary: #f1f5f9;
+            --secondary-foreground: #0f172a;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --radius: 16px;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .header h1 {
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-group select {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .flag-item {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .flag-item.unreviewed {
+            border-left: 4px solid var(--warning);
+        }
+
+        .flag-item.reviewed {
+            border-left: 4px solid var(--success);
+            opacity: 0.7;
+        }
+
+        .flag-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .flag-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .flag-meta {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+            margin-bottom: 1rem;
+        }
+
+        .flag-details {
+            background: var(--muted);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .flag-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+        .btn-primary:hover { background: var(--primary-dark); }
+
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #059669; }
+
+        .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .pagination .btn {
+            padding: 0.5rem 1rem;
+        }
+
+        .pagination span {
+            color: var(--muted-foreground);
+        }
+
+        .no-flags {
+            text-align: center;
+            padding: 3rem;
+            color: var(--muted-foreground);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .flag-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .flag-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Safety Flags Review</h1>
+            <p>Review and manage crisis detection flags from chat conversations.</p>
+        </div>
+
+        <form class="filters" id="filtersForm">
+            <div class="filter-group">
+                <label for="reviewed">Status</label>
+                <select id="reviewed" name="reviewed">
+                    <option value="">All Flags</option>
+                    <option value="false">Unreviewed</option>
+                    <option value="true">Reviewed</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+
+        <% if (flags.length === 0) { %>
+        <div class="no-flags">
+            <h3>No safety flags found</h3>
+            <p>All conversations are being monitored safely.</p>
+        </div>
+        <% } else { %>
+            <% flags.forEach(flag => { %>
+            <div class="flag-item <%= flag.reviewed_by_admin ? 'reviewed' : 'unreviewed' %>">
+                <div class="flag-header">
+                    <div>
+                        <span class="flag-type"><%= flag.flag_type %></span>
+                        <div class="flag-meta">
+                            User: <%= flag.first_name || 'Unknown' %> <%= flag.last_name || '' %> (<%= flag.email %>) |
+                            Confidence: <%= Math.round(flag.confidence * 100) %>% |
+                            Created: <%= new Date(flag.created_at).toLocaleString() %>
+                            <% if (flag.reviewed_by_admin) { %>
+                                | Reviewed: <%= new Date(flag.created_at).toLocaleString() %>
+                            <% } %>
+                        </div>
+                    </div>
+                    <% if (!flag.reviewed_by_admin) { %>
+                    <div class="flag-actions">
+                        <button class="btn btn-success mark-reviewed-btn" data-flag-id="<%= flag.id %>">Mark as Reviewed</button>
+                    </div>
+                    <% } %>
+                </div>
+
+                <div class="flag-details">
+                    <strong>Flag Details:</strong>
+                    <%= JSON.stringify(flag.details, null, 2) %>
+                </div>
+
+                <div class="flag-details">
+                    <strong>Conversation Context:</strong>
+                    Flag occurred in conversation ID: <%= flag.flagged_in_conversation %>
+                </div>
+            </div>
+            <% }); %>
+
+            <% if (pagination.totalPages > 1) { %>
+            <div class="pagination">
+                <% if (pagination.hasPrev) { %>
+                    <a href="?page=<%= pagination.currentPage - 1 %>&reviewed=<%= reviewed || '' %>" class="btn btn-primary">Previous</a>
+                <% } %>
+                <span>Page <%= pagination.currentPage %> of <%= pagination.totalPages %></span>
+                <% if (pagination.hasNext) { %>
+                    <a href="?page=<%= pagination.currentPage + 1 %>&reviewed=<%= reviewed || '' %>" class="btn btn-primary">Next</a>
+                <% } %>
+            </div>
+            <% } %>
+        <% } %>
+    </div>
+
+    <script>
+        // Filter form
+        document.getElementById('filtersForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const params = new URLSearchParams();
+            for (let [key, value] of formData) {
+                if (value !== '') params.append(key, value);
+            }
+            window.location.search = params.toString();
+        });
+
+        // Mark as reviewed buttons
+        document.querySelectorAll('.mark-reviewed-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const flagId = this.dataset.flagId;
+
+                try {
+                    const response = await fetch(`/api/admin/safety-flags/${flagId}/review`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to mark flag as reviewed');
+                    }
+                } catch (error) {
+                    console.error('Review error:', error);
+                    alert('Error marking flag as reviewed');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

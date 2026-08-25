@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'DCGS - Digital Career Guidance System' %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-light);
+        }
+
+        .btn-ghost:hover {
+            color: var(--text);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            min-height: calc(100vh - 200px);
+        }
+
+        .hero-content h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .hero-content h1 span {
+            color: var(--primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .hero-visual {
+            position: relative;
+        }
+
+        .hero-card {
+            background: var(--card);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .subject-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .subject-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .subject-name {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .subject-mark {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .aps-badge {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Auth Tabs Section */
+        .auth-section {
+            background: var(--card);
+            padding: 4rem 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .auth-container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: var(--bg);
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .auth-tab.active {
+            background: var(--card);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-light);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            background: var(--card);
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+            padding: 0.875rem;
+            font-size: 1rem;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            color: var(--success);
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert.active {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading State */
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">D</div>
+                DCGS
+            </a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <% if (user) { %>
+                    <a href="/dashboard" class="btn btn-primary">Dashboard</a>
+                <% } else { %>
+                    <a href="/?tab=login" class="nav-link">Sign In</a>
+                    <a href="/?tab=register" class="btn btn-primary">Get Started</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Your Future Starts With <span>Smart Guidance</span></h1>
+                <p class="hero-subtitle">
+                    AI-powered career counseling for South African students. Upload your matric results, discover your perfect university course, and chat with our AI counselor 24/7.
+                </p>
+                <div class="hero-actions">
+                    <a href="/?tab=register" class="btn btn-primary btn-lg">Start Your Journey</a>
+                    <a href="#how-it-works" class="btn btn-outline">Learn More</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-value">600K+</div>
+                        <div class="stat-label">Grade 12 Candidates</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">26</div>
+                        <div class="stat-label">Universities</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">50K+</div>
+                        <div class="stat-label">Courses</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <div class="card-header">
+                        <div class="avatar">JD</div>
+                        <div>
+                            <div class="card-title">John Doe</div>
+                            <div class="card-subtitle">Matric 2024</div>
+                        </div>
+                    </div>
+                    <div class="subject-list">
+                        <div class="subject-item">
+                            <span class="subject-name">English Home Language</span>
+                            <span class="subject-mark">78%</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-name">Mathematics</span>
+                            <span class="subject-mark">82%</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-name">Physical Sciences</span>
+                            <span class="subject-mark">75%</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-name">Life Sciences</span>
+                            <span class="subject-mark">80%</span>
+                        </div>
+                    </div>
+                    <div class="aps-badge">
+                        APS Score: 32 Points
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auth Section -->
+        <section class="auth-section" id="auth">
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Sign In</button>
+                    <button class="auth-tab" data-tab="register">Create Account</button>
+                </div>
+
+                <!-- Login Form -->
+                <form class="auth-form active" id="login-form" data-endpoint="/api/auth/login">
+                    <div class="alert alert-error" id="login-error"></div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" name="email" placeholder="you@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" name="password" placeholder="••••••••" required minlength="8">
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
+                            <input type="checkbox" name="remember" style="width: auto;">
+                            Remember me for 7 days
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+
+                    <div class="form-footer">
+                        <a href="/forgot-password">Forgot your password?</a>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form class="auth-form" id="register-form" data-endpoint="/api/auth/register">
+                    <div class="alert alert-error" id="register-error"></div>
+                    <div class="alert alert-success" id="register-success"></div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-input" name="firstName" placeholder="John" required minlength="2">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-input" name="lastName" placeholder="Doe" required minlength="2">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" name="email" placeholder="you@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" name="password" placeholder="Minimum 8 characters" required minlength="8">
+                        <small style="color: var(--text-light); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+                            Must be at least 8 characters
+                        </small>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Grade/Status</label>
+                            <select class="form-select" name="grade" required>
+                                <option value="">Select...</option>
+                                <option value="12">Grade 12</option>
+                                <option value="11">Grade 11</option>
+                                <option value="gap-year">Gap Year</option>
+                                <option value="graduate">Recent Graduate</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Province</label>
+                            <select class="form-select" name="province" required>
+                                <option value="">Select...</option>
+                                <option value="EC">Eastern Cape</option>
+                                <option value="FS">Free State</option>
+                                <option value="GP">Gauteng</option>
+                                <option value="KZN">KwaZulu-Natal</option>
+                                <option value="LP">Limpopo</option>
+                                <option value="MP">Mpumalanga</option>
+                                <option value="NC">Northern Cape</option>
+                                <option value="NW">North West</option>
+                                <option value="WC">Western Cape</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">School Name</label>
+                        <input type="text" class="form-input" name="school" placeholder="Your High School" required minlength="2">
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
+                            <input type="checkbox" name="terms" required style="width: auto; margin-top: 0.25rem;">
+                            <span>I agree to the <a href="#" style="color: var(--primary);">Terms of Service</a> and <a href="#" style="color: var(--primary);">Privacy Policy</a></span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+
+                    <div class="form-footer">
+                        Already have an account? <a href="/?tab=login">Sign in</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="section-header">
+                <h2>How DCGS Works</h2>
+                <p>From matric results to university acceptance - your complete digital career guidance journey</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📄</div>
+                    <h3>Upload Results</h3>
+                    <p>Scan or upload your matric report card. Our AI extracts your marks and calculates your APS score automatically.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Get Matched</h3>
+                    <p>Discover universities and courses you qualify for based on your APS, subjects, and career interests.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>AI Counselor</h3>
+                    <p>Chat with our AI career counselor 24/7. Ask about courses, careers, applications, and get instant guidance.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Track Progress</h3>
+                    <p>Monitor your profile completion, application deadlines, and career readiness milestones in one dashboard.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="copyright">
+                © 2024 DCGS. Built for South African students.
+            </div>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+                <a href="#">Help</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tab Switching Logic
+        const tabs = document.querySelectorAll('.auth-tab');
+        const forms = document.querySelectorAll('.auth-form');
+        
+        function switchTab(tabName) {
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+            forms.forEach(form => {
+                form.classList.toggle('active', form.id === `${tabName}-form`);
+            });
+            // Update URL without reload
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabName);
+            window.history.replaceState({}, '', url);
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+        });
+
+        // Check URL param on load
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialTab = urlParams.get('tab') || 'login';
+        if (initialTab === 'register' || initialTab === 'login') {
+            switchTab(initialTab);
+        }
+
+        // Form Submission Handler
+        async function handleFormSubmit(form, endpoint, errorId, successId = null) {
+            const errorEl = document.getElementById(errorId);
+            const successEl = successId ? document.getElementById(successId) : null;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            // Reset alerts
+            errorEl.classList.remove('active');
+            if (successEl) successEl.classList.remove('active');
+            
+            // Loading state
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                
+                // Convert checkbox values
+                if (data.remember === 'on') data.remember = true;
+                if (data.terms === 'on') data.terms = true;
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || result.errors?.[0]?.msg || 'An error occurred');
+                }
+
+                if (successEl) {
+                    successEl.textContent = result.message || 'Success!';
+                    successEl.classList.add('active');
+                }
+
+                // Redirect on success
+                if (result.user || result.message?.includes('successful')) {
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 500);
+                }
+
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.classList.add('active');
+            } finally {
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Login Form
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleFormSubmit(e.target, '/api/auth/login', 'login-error');
+        });
+
+        // Register Form
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleFormSubmit(e.target, '/api/auth/register', 'register-error', 'register-success');
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

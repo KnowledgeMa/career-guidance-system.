@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Assessment Management' %> - DCGS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --background: #ffffff;
+            --foreground: #0f172a;
+            --card: #ffffff;
+            --card-foreground: #0f172a;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --border: #e2e8f0;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-foreground: #ffffff;
+            --secondary: #f1f5f9;
+            --secondary-foreground: #0f172a;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --radius: 16px;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .header h1 {
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .category-section {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .category-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .question-item {
+            background: var(--muted);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.375rem 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+        .btn-primary:hover { background: var(--primary-dark); }
+
+        .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 600px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal h2 {
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .riasec-info {
+            background: var(--info-light);
+            border: 1px solid var(--info);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .riasec-info h3 {
+            color: var(--info);
+            margin-bottom: 0.5rem;
+        }
+
+        .riasec-info p {
+            font-size: 0.875rem;
+            color: var(--foreground);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .category-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .question-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Assessment Management</h1>
+            <p>Manage RIASEC personality assessment questions.</p>
+        </div>
+
+        <div class="riasec-info">
+            <h3>RIASEC Dimensions</h3>
+            <p><strong>R</strong>ealistic, <strong>I</strong>nvestigative, <strong>A</strong>rtistic, <strong>S</strong>ocial, <strong>E</strong>nterprising, <strong>C</strong>onventional</p>
+        </div>
+
+        <% Object.keys(questions).forEach(category => { %>
+        <div class="category-section">
+            <div class="category-header">
+                <h2 class="category-title"><%= category %></h2>
+                <button class="btn btn-primary add-question-btn" data-category="<%= category %>">Add Question</button>
+            </div>
+
+            <% questions[category].forEach(question => { %>
+            <div class="question-item" data-question-id="<%= question.id %>">
+                <div class="question-text"><%= question.question_text %></div>
+                <div class="question-meta">
+                    <span>Dimension: <strong><%= question.riasec_dimension %></strong> | Weight: <%= question.weight %></span>
+                    <div class="question-actions">
+                        <button class="btn btn-secondary edit-btn" data-question-id="<%= question.id %>">Edit</button>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        <% }); %>
+    </div>
+
+    <!-- Add/Edit Question Modal -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Add Question</h2>
+            <form id="questionForm">
+                <input type="hidden" id="questionId" name="questionId">
+                <input type="hidden" id="category" name="category">
+
+                <div class="form-group">
+                    <label for="questionText">Question Text</label>
+                    <textarea id="questionText" name="question_text" required placeholder="Enter the assessment question..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="riasecDimension">RIASEC Dimension</label>
+                    <select id="riasecDimension" name="riasec_dimension" required>
+                        <option value="R">Realistic</option>
+                        <option value="I">Investigative</option>
+                        <option value="A">Artistic</option>
+                        <option value="S">Social</option>
+                        <option value="E">Enterprising</option>
+                        <option value="C">Conventional</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">Weight (1-5)</label>
+                    <input type="number" id="weight" name="weight" min="1" max="5" value="1" required>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestionId = null;
+
+        // Add question buttons
+        document.querySelectorAll('.add-question-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentQuestionId = null;
+                document.getElementById('modalTitle').textContent = 'Add Question';
+                document.getElementById('questionForm').reset();
+                document.getElementById('category').value = this.dataset.category;
+                document.getElementById('questionModal').style.display = 'block';
+            });
+        });
+
+        // Edit buttons
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentQuestionId = this.dataset.questionId;
+                const questionItem = this.closest('.question-item');
+                const questionText = questionItem.querySelector('.question-text').textContent;
+                const dimension = questionItem.querySelector('strong').textContent;
+                const weight = questionItem.querySelector('.question-meta span').textContent.match(/Weight: (\d)/)[1];
+
+                document.getElementById('modalTitle').textContent = 'Edit Question';
+                document.getElementById('questionId').value = currentQuestionId;
+                document.getElementById('questionText').value = questionText;
+                document.getElementById('riasecDimension').value = dimension;
+                document.getElementById('weight').value = weight;
+                document.getElementById('questionModal').style.display = 'block';
+            });
+        });
+
+        // Form submission
+        document.getElementById('questionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            const isEdit = data.questionId;
+
+            try {
+                const url = isEdit ? `/api/admin/assessment/questions/${data.questionId}` : '/api/admin/assessment/questions';
+                const method = isEdit ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question_text: data.question_text,
+                        riasec_dimension: data.riasec_dimension,
+                        weight: parseInt(data.weight)
+                    })
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Failed to save question');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Error saving question');
+            }
+        });
+
+        function closeModal() {
+            document.getElementById('questionModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('questionModal')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

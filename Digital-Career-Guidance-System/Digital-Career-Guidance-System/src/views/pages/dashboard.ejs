@@ -1,0 +1,1682 @@
+<!-- student dashboard -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Dashboard' %> - DCGS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ─── CSS Variables (template system) ─── */
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 245 58% 51%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96%;
+            --secondary-foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222.2 84% 4.9%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --success: 152 69% 31%;
+            --success-bg: 152 69% 92%;
+            --warning: 38 92% 50%;
+            --warning-bg: 48 96% 89%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 245 58% 51%;
+            --radius: 0.75rem;
+            --sidebar-width: 16rem;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 0 solid hsl(var(--border));
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── Layout ─── */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* ─── Sidebar ─── */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: hsl(var(--background));
+            border-right: 1px solid hsl(var(--border));
+            z-index: 30;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed { transform: translateX(-100%); }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .sidebar-logo {
+            width: 2.25rem;
+            height: 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(245 58% 40%));
+            color: hsl(var(--primary-foreground));
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+        }
+
+        .sidebar-brand-sub {
+            font-size: 0.7rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 1px;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0.5rem;
+            overflow-y: auto;
+        }
+
+        .sidebar-content::-webkit-scrollbar { width: 4px; }
+        .sidebar-content::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 2px; }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sidebar-menu-button {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            text-decoration: none;
+            color: hsl(var(--foreground));
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s, color 0.15s;
+        }
+
+        .sidebar-menu-button:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .sidebar-menu-button.active {
+            background-color: hsl(var(--accent));
+            font-weight: 500;
+            color: hsl(var(--primary));
+        }
+
+        .sidebar-menu-left {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .sidebar-menu-button svg {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav-badge {
+            padding: 2px 7px;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .sidebar-user:hover { background-color: hsl(var(--accent)); }
+
+        .avatar {
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(245 58% 40%));
+            color: hsl(var(--primary-foreground));
+            font-weight: 600;
+        }
+
+        .avatar-sm { width: 2rem; height: 2rem; font-size: 0.75rem; }
+        .avatar-md { width: 2.25rem; height: 2.25rem; font-size: 0.875rem; }
+
+        .user-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+
+        .user-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: hsl(var(--muted-foreground));
+            text-transform: capitalize;
+        }
+
+        /* ─── Main Content ─── */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            overflow: auto;
+            transition: margin-left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded { margin-left: 0; }
+
+        /* ─── Topbar ─── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0 1.5rem;
+            height: 4.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .icon-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.375rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: hsl(var(--foreground));
+            transition: background-color 0.15s;
+        }
+
+        .icon-button:hover { background-color: hsl(var(--accent)); }
+
+        .icon-button svg { width: 1.125rem; height: 1.125rem; }
+
+        .topbar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -0.2rem;
+            right: -0.2rem;
+            min-width: 1.125rem;
+            height: 1.125rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            background-color: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+            font-size: 0.6875rem;
+            font-weight: 700;
+        }
+
+        /* ─── Dashboard Content ─── */
+        .dashboard-content {
+            flex: 1;
+            padding: 1.5rem 2rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .dashboard-subtitle {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 0.25rem;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ─── Buttons ─── */
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            white-space: nowrap;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            height: 2.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+            text-decoration: none;
+        }
+
+        .button svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+
+        .button-primary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .button-primary:hover { background-color: hsl(245 58% 44%); }
+
+        .button-outline {
+            background-color: hsl(var(--background));
+            border: 1px solid hsl(var(--input));
+            color: hsl(var(--foreground));
+        }
+
+        .button-outline:hover { background-color: hsl(var(--accent)); }
+
+        .button-sm { height: 2.125rem; padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+
+        /* ─── Tabs ─── */
+        .tabs { display: flex; flex-direction: column; gap: 1rem; }
+
+        .tabs-list {
+            display: inline-flex;
+            height: 2.5rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            background-color: hsl(var(--muted));
+            padding: 0.25rem;
+            color: hsl(var(--muted-foreground));
+            width: fit-content;
+        }
+
+        .tab-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            padding: 0.375rem 0.875rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: inherit;
+            transition: all 0.15s;
+        }
+
+        .tab-trigger:hover { color: hsl(var(--foreground)); }
+
+        .tab-trigger.active {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+
+        .tab-trigger svg { width: 0.875rem; height: 0.875rem; }
+
+        .tab-content { display: none; }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* ─── Stats Grid ─── */
+        .stats-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } }
+
+        /* ─── Card ─── */
+        .card {
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--card));
+            color: hsl(var(--card-foreground));
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .card-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+            padding: 1.5rem;
+        }
+
+        .card-header-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.5rem;
+        }
+
+        .card-header-row .card-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .card-header-row svg {
+            width: 1rem;
+            height: 1rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.025em;
+        }
+
+        .card-title-md {
+            font-size: 1.125rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .card-description {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .card-content { padding: 0 1.5rem 1.5rem; }
+
+        .card-content-padded { padding: 1.5rem; padding-top: 0; }
+
+        .stat-change {
+            font-size: 0.75rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 0.25rem;
+        }
+
+        /* ─── Charts Grid ─── */
+        .charts-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 4fr 3fr;
+        }
+
+        @media (max-width: 1024px) { .charts-grid { grid-template-columns: 1fr; } }
+
+        /* ─── Action Cards ─── */
+        .action-cards-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (max-width: 640px) { .action-cards-grid { grid-template-columns: 1fr; } }
+
+        .action-card {
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--card));
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.875rem;
+            text-decoration: none;
+            color: hsl(var(--card-foreground));
+            cursor: pointer;
+            transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
+        }
+
+        .action-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: hsl(var(--primary) / 40%);
+            transform: translateY(-2px);
+        }
+
+        .action-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .action-card-icon {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 0.625rem;
+            background-color: hsl(var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.375rem;
+            transition: background-color 0.15s;
+        }
+
+        .action-card:hover .action-card-icon {
+            background-color: hsl(var(--primary));
+        }
+
+        .action-card-title { font-size: 0.9375rem; font-weight: 600; }
+
+        .action-card-desc {
+            font-size: 0.8125rem;
+            color: hsl(var(--muted-foreground));
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .action-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.75rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .action-arrow {
+            color: hsl(var(--muted-foreground));
+            transition: transform 0.15s, color 0.15s;
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .action-card:hover .action-arrow {
+            transform: translateX(3px);
+            color: hsl(var(--primary));
+        }
+
+        /* ─── Status Badges ─── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.1875rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-pending  { background: hsl(var(--warning-bg)); color: #92400e; }
+        .badge-complete { background: hsl(var(--success-bg)); color: #065f46; }
+        .badge-locked   { background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+        .badge-available { background: hsl(245 58% 51% / 0.1); color: hsl(var(--primary)); }
+        .badge-level    { background: hsl(210 80% 92%); color: hsl(221 83% 35%); }
+
+        /* ─── Progress Card ─── */
+        .progress-card {
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--card));
+            padding: 1.5rem;
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .progress-percentage {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: hsl(var(--primary));
+        }
+
+        .progress-bar-track {
+            height: 8px;
+            background: hsl(var(--muted));
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, hsl(var(--primary)), hsl(245 58% 40%));
+            border-radius: 9999px;
+            transition: width 0.6s ease;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: hsl(var(--border));
+            z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: hsl(var(--border));
+            transition: all 0.3s;
+        }
+
+        .step-dot.active {
+            background: hsl(var(--primary));
+            box-shadow: 0 0 0 3px hsl(var(--primary) / 20%);
+        }
+
+        .step-label { font-size: 0.6875rem; color: hsl(var(--muted-foreground)); font-weight: 500; text-align: center; }
+
+        /* ─── Results Table ─── */
+        .subject-table { width: 100%; border-collapse: collapse; }
+
+        .subject-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: hsl(var(--muted-foreground));
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .subject-table td {
+            padding: 0.875rem 1rem;
+            font-size: 0.875rem;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .subject-table tr:last-child td { border-bottom: none; }
+        .subject-table tbody tr:hover { background: hsl(var(--accent)); }
+
+        .aps-summary-box {
+            margin-top: 1.25rem;
+            padding: 1.25rem;
+            background: hsl(var(--primary) / 5%);
+            border: 1px solid hsl(var(--primary) / 15%);
+            border-radius: 0.625rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .aps-summary-label { font-size: 0.875rem; color: hsl(var(--muted-foreground)); font-weight: 500; }
+        .aps-summary-value { font-size: 2rem; font-weight: 700; color: hsl(var(--primary)); }
+
+        /* ─── Empty State ─── */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+        .empty-title { font-weight: 600; color: hsl(var(--foreground)); margin-bottom: 0.5rem; font-size: 1rem; }
+        .empty-desc { font-size: 0.875rem; margin-bottom: 1.5rem; max-width: 280px; margin-left: auto; margin-right: auto; }
+
+        /* ─── Recent Activity ─── */
+        .activity-list { display: flex; flex-direction: column; gap: 1.125rem; }
+
+        .activity-item { display: flex; align-items: center; gap: 0.875rem; }
+
+        .activity-dot {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            background: hsl(var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .activity-info { flex: 1; min-width: 0; background: rgba(32, 0, 135, 0.052); padding: 0.5rem 1.5rem; border-radius: 0.5rem; display: flex; gap: 0.5rem; align-items: center;}
+        .activity-desc { font-size: 0.875rem; font-weight: 500; }
+        .activity-time { font-size: 0.75rem; color: hsl(var(--muted-foreground)); margin-top: 2px; padding: 0.15rem 0.5rem; border-radius: 0.65rem; background: rgba(255, 255, 255, 0.656); }
+        .activity-right { font-size: 0.75rem; color: hsl(var(--muted-foreground)); white-space: nowrap; }
+
+        /* ─── Dropdown ─── */
+        .dropdown { position: relative; display: inline-block; }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            min-width: 200px;
+            background-color: hsl(var(--popover));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 50;
+            overflow: hidden;
+            animation: dropFade 0.12s ease-out;
+        }
+
+        .dropdown-content.show { display: block; }
+
+        @keyframes dropFade {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-label { padding: 0.625rem 0.875rem; font-size: 0.875rem; font-weight: 600; }
+
+        .dropdown-separator { height: 1px; background: hsl(var(--border)); margin: 0.25rem 0; }
+
+        .dropdown-item {
+            padding: 0.5rem 0.875rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+            color: hsl(var(--foreground));
+        }
+
+        .dropdown-item:hover { background-color: hsl(var(--accent)); }
+        .dropdown-item.danger { color: hsl(var(--destructive)); }
+        .dropdown-item svg { width: 0.875rem; height: 0.875rem; }
+
+        /* ─── Hero Banner ─── */
+        .hero-banner {
+            border-radius: var(--radius);
+            padding: 1.75rem 2rem;
+            background: linear-gradient(135deg, hsl(245 58% 51%), hsl(245 58% 40%), hsl(264 60% 48%));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-text { display: flex; flex-direction: column; gap: 0.625rem; }
+
+        .hero-badge {
+            display: inline-flex;
+            width: fit-content;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.2);
+            font-size: 0.75rem;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+        }
+
+        .hero-title { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
+        .hero-desc { font-size: 0.875rem; opacity: 0.88; max-width: 460px; line-height: 1.6; }
+
+        .hero-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.375rem; }
+
+        .btn-hero-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background: white;
+            color: hsl(var(--primary));
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.15s;
+        }
+
+        .btn-hero-primary:hover { opacity: 0.92; }
+
+        .btn-hero-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.5);
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.15s;
+        }
+
+        .btn-hero-outline:hover { background: rgba(255,255,255,0.12); }
+
+        .hero-graphic {
+            display: none;
+        }
+
+        @media (min-width: 900px) {
+            .hero-graphic {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                flex-shrink: 0;
+            }
+        }
+
+        .hero-stat-pill {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 0.75rem;
+            padding: 0.875rem 1.125rem;
+            text-align: center;
+            min-width: 5.5rem;
+        }
+
+        .hero-stat-value { font-size: 1.5rem; font-weight: 700; }
+        .hero-stat-label { font-size: 0.6875rem; opacity: 0.8; margin-top: 2px; }
+
+        /* ─── Mobile overlay ─── */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 25;
+        }
+
+        .mobile-overlay.active { display: block; }
+
+        /* ─── Footer ─── */
+        footer {
+            padding: 1rem 2rem;
+            border-top: 1px solid hsl(var(--border));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8125rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        /* ─── Utility ─── */
+        .hidden { display: none !important; }
+        .text-primary { color: hsl(var(--primary)); }
+        .fw-600 { font-weight: 600; }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .topbar, .dashboard-content { padding-left: 1rem; padding-right: 1rem; }
+            .hero-title { font-size: 1.375rem; }
+            .mobile-menu-btn { display: flex !important; }
+            footer { flex-direction: column; gap: 0.25rem; text-align: center; }
+        }
+
+        .mobile-menu-btn { display: none; }
+
+        @media (min-width: 769px) { .desktop-only-sidebar-toggle { display: flex; } }
+    </style>
+</head>
+<body>
+
+<!-- Mobile Overlay -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+<div class="app-container">
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">D</div>
+            <div>
+                <div class="sidebar-brand-name">DCGS</div>
+                <div class="sidebar-brand-sub">Career Guidance</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-content">
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="/dashboard" class="sidebar-menu-button active">
+                        <div class="sidebar-menu-left">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+                                <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            </svg>
+                            <span>Dashboard</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/upload" class="sidebar-menu-button">
+                        <div class="sidebar-menu-left">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            <span>Upload Results</span>
+                        </div>
+                        <span class="sidebar-nav-badge <%= user.has_results ? 'hidden' : '' %>" id="uploadBadge">New</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/recommendations" class="sidebar-menu-button">
+                        <div class="sidebar-menu-left">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            <span>Recommendations</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/counsellor" class="sidebar-menu-button">
+                        <div class="sidebar-menu-left">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                            </svg>
+                            <span>AI Counselor</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/assessment" class="sidebar-menu-button">
+                        <div class="sidebar-menu-left">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                            <span>Assessment</span>
+                        </div>
+                        <span class="sidebar-nav-badge <%= user.has_assessment ? 'hidden' : '' %>" id="assessBadge">New</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/profile" class="sidebar-menu-button">
+                        <div class="sidebar-menu-left">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <span>Profile</span>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="dropdown">
+                <div class="sidebar-user" onclick="toggleDropdown('userDropdown')">
+                    <div class="avatar avatar-sm"><%= user.first_name ? user.first_name[0].toUpperCase() : user.email[0].toUpperCase() %></div>
+                    <div class="user-info">
+                        <span class="user-name"><%= user.first_name ? user.first_name + ' ' + (user.last_name || '') : user.email.split('@')[0] %></span>
+                        <span class="user-role"><%= user.role %></span>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:hsl(var(--muted-foreground));flex-shrink:0">
+                        <path d="m18 15-6-6-6 6"/>
+                    </svg>
+                </div>
+                <div id="userDropdown" class="dropdown-content" style="bottom: calc(100% + 0.5rem); top: auto;">
+                    <div class="dropdown-label">My Account</div>
+                    <div class="dropdown-separator"></div>
+                    <a href="/profile" class="dropdown-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Profile Settings
+                    </a>
+                    <div class="dropdown-separator"></div>
+                    <a href="#" class="dropdown-item danger" onclick="logout(); return false;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="main-content" id="mainContent">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <!-- Mobile hamburger -->
+                <button class="icon-button mobile-menu-btn" onclick="openMobileMenu()" style="display:none" id="mobileMenuBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>
+                    </svg>
+                </button>
+                <!-- Desktop sidebar toggle -->
+                <button class="icon-button" onclick="toggleSidebar()" id="sidebarToggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>
+                    </svg>
+                </button>
+                <span class="topbar-title">Dashboard</span>
+            </div>
+
+            <div class="topbar-actions">
+                <!-- Notifications -->
+                <div class="dropdown">
+                    <button class="icon-button" onclick="toggleDropdown('notifDropdown')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                        </svg>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div id="notifDropdown" class="dropdown-content" style="width: 300px;">
+                        <div class="dropdown-label">Notifications</div>
+                        <div class="dropdown-separator"></div>
+                        <div class="dropdown-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                            <span style="font-weight:500;font-size:0.8125rem"><i class="fa-regular fa-handshake"></i> Welcome to DCGS!</span>
+                            <span style="font-size:0.75rem;color:hsl(var(--muted-foreground))">Get started on your career journey</span>
+                        </div>
+                        <div class="dropdown-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                            <span style="font-weight:500;font-size:0.8125rem"><i class="fa-solid fa-arrow-up-from-bracket"></i> Upload your matric results</span>
+                            <span style="font-size:0.75rem;color:hsl(var(--muted-foreground))">Needed to calculate your APS score</span>
+                        </div>
+                        <div class="dropdown-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                            <span style="font-weight:500;font-size:0.8125rem"><i class="fa-solid fa-brain"></i> Take the career assessment</span>
+                            <span style="font-size:0.75rem;color:hsl(var(--muted-foreground))">Discover your RIASEC profile</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avatar -->
+                <div class="dropdown">
+                    <button class="avatar avatar-sm" onclick="toggleDropdown('topbarUserDropdown')" style="cursor:pointer;border:none">
+                        <%= user.first_name ? user.first_name[0].toUpperCase() : user.email[0].toUpperCase() %>
+                    </button>
+                    <div id="topbarUserDropdown" class="dropdown-content">
+                        <div class="dropdown-label">My Account</div>
+                        <div class="dropdown-separator"></div>
+                        <a href="/profile" class="dropdown-item">Profile</a>
+                        <div class="dropdown-separator"></div>
+                        <a href="#" class="dropdown-item danger" onclick="logout(); return false;">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div>
+                    <!-- <h2 class="dashboard-title">Dashboard</h2> -->
+                    <p class="dashboard-subtitle">Welcome back, <strong><%= user.first_name || 'Student' %></strong> — here's your career readiness overview.</p>
+                </div>
+                <div class="dashboard-actions">
+                    <a href="/upload" class="button button-outline button-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Upload Results
+                    </a>
+                    <a href="/assessment" class="button button-primary button-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        Take Assessment
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tabs-list">
+                    <button class="tab-trigger active" onclick="showTab('overview', this)">
+                        <i class="fa-regular fa-square"></i>
+                        Overview
+                    </button>
+                    <button class="tab-trigger" onclick="showTab('results', this)">
+                        <i class="fa-solid fa-square-poll-horizontal"></i>
+                        My Results
+                    </button>
+                    <button class="tab-trigger" onclick="showTab('actions', this)">
+                        <i class="fa-solid fa-bars-staggered"></i>
+                        Quick Actions
+                    </button>
+                </div>
+
+                <!-- ── OVERVIEW TAB ── -->
+                <div id="tab-overview" class="tab-content active">
+
+                    <!-- Hero Banner -->
+                    <div class="hero-banner">
+                        <div class="hero-text">
+                            <span class="hero-badge">👋 Welcome Back</span>
+                            <h3 class="hero-title">Hi, <%= user.first_name || 'Student' %>!</h3>
+                            <p class="hero-desc">Ready to discover your perfect career path? Upload your matric results, take our RIASEC assessment, and get personalised university recommendations.</p>
+                            <div class="hero-buttons">
+                                <a href="/upload" class="btn-hero-primary">Upload Results</a>
+                                <a href="/assessment" class="btn-hero-outline">Take Assessment</a>
+                            </div>
+                        </div>
+                        <div class="hero-graphic" id="heroPills">
+                            <!-- Populated by JS with live data -->
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="card">
+                            <div class="card-header card-header-row">
+                                <span class="card-label">Profile Completion</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-title" id="profileCompletionValue"><%= user.profile_completion || 0 %>%</div>
+                                <p class="stat-change">Keep completing steps</p>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header card-header-row">
+                                <span class="card-label">APS Score</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-title" id="apsValue"><%= user.latest_aps_score || '—' %></div>
+                                <p class="stat-change">Best 6 subjects</p>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header card-header-row">
+                                <span class="card-label">Subjects Recorded</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-title" id="subjectCount">—</div>
+                                <p class="stat-change">NSC subjects</p>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header card-header-row">
+                                <span class="card-label">Recommendations</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-title"><%= user.recommendations_count || '—' %></div>
+                                <p class="stat-change">Course matches found</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress + Activity Grid -->
+                    <div class="charts-grid">
+                        <!-- Progress Card -->
+                        <div class="progress-card">
+                            <div class="progress-header">
+                                <span class="card-title-md">Your Progress</span>
+                                <span class="progress-percentage" id="progressPct"><%= user.profile_completion || 0 %>%</span>
+                            </div>
+                            <div class="progress-bar-track" style="display: none;">
+                                <div class="progress-bar-fill" id="progressFill" style="width: <%= user.profile_completion || 0 %>%"></div>
+                            </div>
+                            <div class="progress-steps">
+                                <div class="step">
+                                    <div class="step-dot <%= user.profile_completion >= 20 ? 'active' : '' %>"></div>
+                                    <span class="step-label">Profile</span>
+                                </div>
+                                <div class="step">
+                                    <div class="step-dot <%= user.has_results ? 'active' : '' %>" id="stepResults"></div>
+                                    <span class="step-label">Results</span>
+                                </div>
+                                <div class="step">
+                                    <div class="step-dot <%= user.has_assessment ? 'active' : '' %>" id="stepAssessment"></div>
+                                    <span class="step-label">Assessment</span>
+                                </div>
+                                <div class="step">
+                                    <div class="step-dot" id="stepRecommendations"></div>
+                                    <span class="step-label">Matches</span>
+                                </div>
+                                <div class="step">
+                                    <div class="step-dot"></div>
+                                    <span class="step-label">Apply</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title-md">Recent Activity</span>
+                                <p class="card-description">Your last 7 days</p>
+                            </div>
+                            <div class="card-content-padded">
+                                <div class="activity-list" id="activityList">
+                                    <% if (user.recent_activity && user.recent_activity.length > 0) { %>
+                                        <% user.recent_activity.forEach(function(act) { %>
+                                            <div class="activity-item">
+                                                
+                                                <div class="activity-info">
+                                                    <div class="activity-desc"><i class="fa-regular fa-circle-dot"></i> <%= act.description %></div>
+                                                    <div class="activity-time"><i class="fa-regular fa-calendar"></i> <%= new Date(act.timestamp).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' }) %></div>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <div style="text-align:center;padding:1.5rem;color:hsl(var(--muted-foreground));font-size:0.875rem">
+                                            No recent activity yet.<br>
+                                            <a href="/upload" style="color:hsl(var(--primary));text-decoration:none;font-weight:500">Upload results to get started →</a>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── RESULTS TAB ── -->
+                <div id="tab-results" class="tab-content">
+                    <div class="card">
+                        <div class="card-header" style="padding-bottom:0">
+                            <div style="display:flex;align-items:center;justify-content:space-between">
+                                <div>
+                                    <span class="card-title-md">Your Matric Results</span>
+                                    <p class="card-description" style="margin-top:4px">NSC subject marks and APS breakdown</p>
+                                </div>
+                                <a href="/upload" class="button button-outline button-sm">Update Results</a>
+                            </div>
+                        </div>
+                        <div class="card-content" style="padding-top:1.25rem">
+                            <div id="resultsContainer">
+                                <% if (user.subjects && user.subjects.length > 0) { %>
+                                    <!-- Server-rendered results table -->
+                                    <div style="overflow-x:auto">
+                                        <table class="subject-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Subject</th>
+                                                    <th>Mark</th>
+                                                    <th>Level</th>
+                                                    <th>APS Points</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% user.subjects.forEach(function(s) { %>
+                                                    <tr>
+                                                        <td class="fw-600"><%= s.subject %></td>
+                                                        <td><%= s.mark %>%</td>
+                                                        <td><span class="badge badge-level">Level <%= s.level %></span></td>
+                                                        <td class="fw-600 text-primary"><%= s.aps_points %></td>
+                                                        <td><span class="badge badge-complete">✓ Confirmed</span></td>
+                                                    </tr>
+                                                <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <% if (user.latest_aps_score) { %>
+                                        <div class="aps-summary-box">
+                                            <div>
+                                                <div class="aps-summary-label">Total APS Score (Best 6 Subjects)</div>
+                                                <div style="font-size:0.75rem;color:hsl(var(--muted-foreground));margin-top:2px">Used for university admission requirements</div>
+                                            </div>
+                                            <div class="aps-summary-value"><%= user.latest_aps_score %></div>
+                                        </div>
+                                    <% } %>
+                                    <!-- Subject breakdown bar chart -->
+                                    <div style="margin-top:1.5rem">
+                                        <div style="font-size:0.875rem;font-weight:600;margin-bottom:0.875rem;color:hsl(var(--foreground))">Subject Performance</div>
+                                        <div style="display:flex;flex-direction:column;gap:0.625rem" id="subjectBars">
+                                            <% user.subjects.forEach(function(s) { %>
+                                                <div style="display:flex;align-items:center;gap:0.75rem">
+                                                    <div style="width:11rem;font-size:0.75rem;color:hsl(var(--muted-foreground));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0" title="<%= s.subject %>"><%= s.subject %></div>
+                                                    <div style="flex:1;height:8px;background:hsl(var(--muted));border-radius:9999px;overflow:hidden">
+                                                        <div style="height:100%;width:<%= s.mark %>%;background:<%= s.mark >= 70 ? 'hsl(var(--success))' : s.mark >= 50 ? 'hsl(var(--primary))' : 'hsl(var(--warning))' %>;border-radius:9999px;transition:width 0.6s ease"></div>
+                                                    </div>
+                                                    <div style="width:2.5rem;text-align:right;font-size:0.75rem;font-weight:600;color:hsl(var(--foreground));flex-shrink:0"><%= s.mark %>%</div>
+                                                </div>
+                                            <% }); %>
+                                        </div>
+                                    </div>
+                                <% } else { %>
+                                    <!-- Empty state — no results yet -->
+                                    <div class="empty-state" id="resultsEmptyState">
+                                        <div class="empty-icon"><i class="fa-solid fa-square-poll-horizontal"></i></div>
+                                        <div class="empty-title">No results uploaded yet</div>
+                                        <div class="empty-desc">Upload your matric report card to see your subjects, levels, and APS score.</div>
+                                        <a href="/upload" class="button button-primary">Upload Now</a>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── QUICK ACTIONS TAB ── -->
+                <div id="tab-actions" class="tab-content">
+                    <div class="action-cards-grid">
+                        <a href="/upload" class="action-card">
+                            <div class="action-card-top">
+                                <div class="action-card-icon"><i class="fa-solid fa-square-poll-horizontal"></i></div>
+                                <span class="badge <%= user.has_results ? 'badge-complete' : 'badge-pending' %>">
+                                    <%= user.has_results ? 'Completed' : 'Pending' %>
+                                </span>
+                            </div>
+                            <div>
+                                <div class="action-card-title">Upload Results</div>
+                                <p class="action-card-desc">Scan or upload your matric report card. Our AI-powered OCR will calculate your APS score automatically.</p>
+                            </div>
+                            <div class="action-card-footer">
+                                <span style="font-size:0.8125rem;color:hsl(var(--muted-foreground))">Go to upload →</span>
+                                <svg class="action-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                        </a>
+
+                        <a href="/assessment" class="action-card">
+                            <div class="action-card-top">
+                                <div class="action-card-icon"><i class="fa-solid fa-brain"></i></div>
+                                <span class="badge <%= user.has_assessment ? 'badge-complete' : 'badge-pending' %>">
+                                    <%= user.has_assessment ? 'Completed' : 'Pending' %>
+                                </span>
+                            </div>
+                            <div>
+                                <div class="action-card-title">Career Assessment</div>
+                                <p class="action-card-desc">Discover your RIASEC personality type and receive personalised course recommendations aligned to your strengths.</p>
+                            </div>
+                            <div class="action-card-footer">
+                                <span style="font-size:0.8125rem;color:hsl(var(--muted-foreground))">
+                                    <%= user.has_assessment ? 'View results →' : 'Start assessment →' %>
+                                </span>
+                                <svg class="action-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                        </a>
+
+                        <a href="#" class="action-card" onclick="alert('Use the chat widget for now!'); return false;">
+                            <div class="action-card-top">
+                                <div class="action-card-icon"><i class="fa-regular fa-message"></i></div>
+                                <span class="badge badge-available">Available</span>
+                            </div>
+                            <div>
+                                <div class="action-card-title">AI Counselor</div>
+                                <p class="action-card-desc">Chat with our AI counselor for instant answers about universities, admission requirements, and career paths.</p>
+                            </div>
+                            <div class="action-card-footer">
+                                <span style="font-size:0.8125rem;color:hsl(var(--muted-foreground))">Chat now →</span>
+                                <svg class="action-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                        </a>
+
+                        <a href="/recommendations" class="action-card"
+                           onclick="return <%= user.has_results ? 'true' : 'false' %> || (alert('Please upload your results first!') && false)">
+                            <div class="action-card-top">
+                                <div class="action-card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                                <span class="badge <%= user.has_results ? 'badge-available' : 'badge-locked' %>">
+                                    <%= user.has_results ? 'Available' : 'Locked' %>
+                                </span>
+                            </div>
+                            <div>
+                                <div class="action-card-title">View Matches</div>
+                                <p class="action-card-desc">See all universities and courses you qualify for based on your APS score, subjects, and career interests.</p>
+                            </div>
+                            <div class="action-card-footer">
+                                <span style="font-size:0.8125rem;color:hsl(var(--muted-foreground))">
+                                    <%= user.has_results ? 'View matches →' : 'Upload results first' %>
+                                </span>
+                                <svg class="action-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer>
+            <span>© 2026 Digital career guidance system. Built for South African students.</span>
+            <span>Phase 1.0 · Zero-Budget Build</span>
+        </footer>
+    </main>
+</div>
+
+<script>
+    const userData = <%- JSON.stringify(user) %>;
+
+    /* ── Tab switching ── */
+    function showTab(tabName, triggerEl) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-trigger').forEach(t => t.classList.remove('active'));
+        const tab = document.getElementById('tab-' + tabName);
+        if (tab) tab.classList.add('active');
+        if (triggerEl) triggerEl.classList.add('active');
+    }
+
+    /* ── Dropdown toggle ── */
+    function toggleDropdown(id) {
+        document.querySelectorAll('.dropdown-content').forEach(d => {
+            if (d.id !== id) d.classList.remove('show');
+        });
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('show');
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+        }
+    });
+
+    /* ── Sidebar ── */
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const main = document.getElementById('mainContent');
+        sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+    }
+
+    function openMobileMenu() {
+        document.getElementById('mobileOverlay').classList.add('active');
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.remove('collapsed');
+        sidebar.classList.add('mobile-open');
+    }
+
+    function closeMobileMenu() {
+        document.getElementById('mobileOverlay').classList.remove('active');
+        document.getElementById('sidebar').classList.remove('mobile-open');
+    }
+
+    /* ── Logout ── */
+    async function logout() {
+        try {
+            const res = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+            if (res.ok) window.location.href = '/';
+        } catch (e) { console.error('Logout error', e); }
+    }
+
+    /* ── Sync stat cards from server-side EJS subjects ── */
+    function syncStatsFromEJS() {
+        const subjects = userData.subjects || [];
+        const apsScore = userData.latest_aps_score;
+
+        if (subjects.length > 0) {
+            document.getElementById('apsValue').textContent = apsScore || '—';
+            document.getElementById('subjectCount').textContent = subjects.length;
+            document.getElementById('stepResults').classList.add('active');
+            document.getElementById('uploadBadge')?.classList.add('hidden');
+
+            // Hero pills
+            const pillsEl = document.getElementById('heroPills');
+            if (pillsEl) {
+                pillsEl.innerHTML = `
+                    <div class="hero-stat-pill">
+                        <div class="hero-stat-value">${apsScore || '—'}</div>
+                        <div class="hero-stat-label">APS Score</div>
+                    </div>
+                    <div class="hero-stat-pill">
+                        <div class="hero-stat-value">${subjects.length}</div>
+                        <div class="hero-stat-label">Subjects</div>
+                    </div>
+                `;
+            }
+
+            // Progress
+            const currentPct = parseInt(userData.profile_completion) || 0;
+            const newPct = Math.min(currentPct + (userData.has_results ? 0 : 40), 100);
+            document.getElementById('progressPct').textContent = newPct + '%';
+            document.getElementById('progressFill').style.width = newPct + '%';
+            document.getElementById('profileCompletionValue').textContent = newPct + '%';
+
+            if (userData.has_assessment) {
+                document.getElementById('stepRecommendations')?.classList.add('active');
+            }
+        }
+    }
+
+    /* ── Fetch fresh results only when EJS has no subjects yet (e.g. upload just processed) ── */
+    async function fetchResults() {
+        // If EJS already gave us subjects, nothing to do — table is already rendered server-side
+        if (userData.subjects && userData.subjects.length > 0) return;
+
+        try {
+            const res = await fetch('/api/results/latest', { credentials: 'include' });
+            const data = await res.json();
+
+            if (!data.hasResults || !data.subjects || data.subjects.length === 0) return;
+
+            // Update stat cards
+            document.getElementById('apsValue').textContent = data.apsScore || '—';
+            document.getElementById('subjectCount').textContent = data.subjects.length;
+            document.getElementById('stepResults').classList.add('active');
+            document.getElementById('uploadBadge')?.classList.add('hidden');
+
+            const pillsEl = document.getElementById('heroPills');
+            if (pillsEl) {
+                pillsEl.innerHTML = `
+                    <div class="hero-stat-pill">
+                        <div class="hero-stat-value">${data.apsScore || '—'}</div>
+                        <div class="hero-stat-label">APS Score</div>
+                    </div>
+                    <div class="hero-stat-pill">
+                        <div class="hero-stat-value">${data.subjects.length}</div>
+                        <div class="hero-stat-label">Subjects</div>
+                    </div>
+                `;
+            }
+
+            if (userData.has_assessment) {
+                document.getElementById('stepRecommendations')?.classList.add('active');
+            }
+
+            // Only replace the empty-state placeholder — don't overwrite a rendered table
+            const container = document.getElementById('resultsContainer');
+            if (!container.querySelector('.subject-table')) {
+                container.innerHTML = `
+                    <div style="overflow-x:auto">
+                        <table class="subject-table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Mark</th>
+                                    <th>Level</th>
+                                    <th>APS Points</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.subjects.map(s => `
+                                    <tr>
+                                        <td class="fw-600">${s.subject}</td>
+                                        <td>${s.mark}%</td>
+                                        <td><span class="badge badge-level">Level ${s.level}</span></td>
+                                        <td class="fw-600 text-primary">${s.aps_points}</td>
+                                        <td><span class="badge badge-complete">✓ Confirmed</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="aps-summary-box">
+                        <div>
+                            <div class="aps-summary-label">Total APS Score (Best 6 Subjects)</div>
+                            <div style="font-size:0.75rem;color:hsl(var(--muted-foreground));margin-top:2px">Used for university admission requirements</div>
+                        </div>
+                        <div class="aps-summary-value">${data.apsScore}</div>
+                    </div>
+                    <div style="margin-top:1.5rem">
+                        <div style="font-size:0.875rem;font-weight:600;margin-bottom:0.875rem">Subject Performance</div>
+                        <div style="display:flex;flex-direction:column;gap:0.625rem">
+                            ${data.subjects.map(s => `
+                                <div style="display:flex;align-items:center;gap:0.75rem">
+                                    <div style="width:11rem;font-size:0.75rem;color:hsl(var(--muted-foreground));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0">${s.subject}</div>
+                                    <div style="flex:1;height:8px;background:hsl(var(--muted));border-radius:9999px;overflow:hidden">
+                                        <div style="height:100%;width:${s.mark}%;background:${s.mark >= 70 ? 'hsl(var(--success))' : s.mark >= 50 ? 'hsl(var(--primary))' : 'hsl(var(--warning))'};border-radius:9999px"></div>
+                                    </div>
+                                    <div style="width:2.5rem;text-align:right;font-size:0.75rem;font-weight:600;flex-shrink:0">${s.mark}%</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            console.error('fetchResults error:', err);
+        }
+    }
+
+    /* ── Responsive handling ── */
+    function handleResize() {
+        const btn = document.getElementById('mobileMenuBtn');
+        const toggle = document.getElementById('sidebarToggle');
+        if (window.innerWidth <= 768) {
+            btn.style.display = 'flex';
+            toggle.style.display = 'none';
+            document.getElementById('sidebar').classList.add('collapsed');
+            document.getElementById('mainContent').classList.add('expanded');
+        } else {
+            btn.style.display = 'none';
+            toggle.style.display = 'flex';
+            closeMobileMenu();
+            document.getElementById('sidebar').classList.remove('collapsed', 'mobile-open');
+            document.getElementById('mainContent').classList.remove('expanded');
+        }
+    }
+
+    /* ── Init ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        syncStatsFromEJS();   // instant: syncs stat cards from server-injected userData
+        fetchResults();        // fallback: catches newly processed uploads not yet in userData
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
+        // Animate progress bar on load
+        setTimeout(() => {
+            const pct = userData.profile_completion || 0;
+            document.getElementById('progressFill').style.width = pct + '%';
+        }, 200);
+    });
+</script>
+</body>
+</html>

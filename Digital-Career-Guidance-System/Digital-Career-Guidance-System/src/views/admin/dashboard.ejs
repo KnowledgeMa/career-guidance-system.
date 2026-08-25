@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Admin Dashboard' %> - DCGS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --background: #ffffff;
+            --foreground: #0f172a;
+            --card: #ffffff;
+            --card-foreground: #0f172a;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --border: #e2e8f0;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-foreground: #ffffff;
+            --secondary: #f1f5f9;
+            --secondary-foreground: #0f172a;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --radius: 16px;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .header h1 {
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: var(--muted-foreground);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--muted-foreground);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card .subtext {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .nav-link {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: var(--primary-foreground);
+            text-decoration: none;
+            border-radius: var(--radius);
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--primary-dark);
+        }
+
+        .recent-activity {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .recent-activity h2 {
+            color: var(--foreground);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item .time {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .activity-item .description {
+            font-weight: 500;
+            margin: 0.25rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome back, <%= user.first_name %>! Here's an overview of your platform.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <div class="value"><%= stats.users.total_users %></div>
+                <div class="subtext"><%= stats.users.active_users %> active in last 30 days</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Students</h3>
+                <div class="value"><%= stats.users.students %></div>
+                <div class="subtext"><%= stats.users.parents %> parents registered</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Assessments</h3>
+                <div class="value"><%= stats.assessments.total_assessments %></div>
+                <div class="subtext"><%= stats.assessments.completed_assessments %> completed</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>OCR Success Rate</h3>
+                <div class="value"><%= Math.round((stats.ocr.successful_ocr / stats.ocr.total_uploads) * 100) %>%</div>
+                <div class="subtext"><%= stats.ocr.successful_ocr %> of <%= stats.ocr.total_uploads %> uploads</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Safety Flags</h3>
+                <div class="value"><%= stats.safety.total_flags %></div>
+                <div class="subtext"><%= stats.safety.reviewed_flags %> reviewed</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Courses</h3>
+                <div class="value"><%= stats.courses.total_courses %></div>
+                <div class="subtext">Available for matching</div>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <a href="/admin/users" class="nav-link">Manage Users</a>
+            <a href="/admin/assessment" class="nav-link">Assessment Questions</a>
+            <a href="/admin/ocr-uploads" class="nav-link">OCR Uploads</a>
+            <a href="/admin/safety-flags" class="nav-link">Safety Flags</a>
+            <a href="/admin/courses" class="nav-link">Courses</a>
+            <a href="/admin/audit-logs" class="nav-link">Audit Logs</a>
+        </div>
+
+        <div class="recent-activity">
+            <h2>Quick Actions</h2>
+            <ul class="activity-list">
+                <li class="activity-item">
+                    <div class="description">Review pending safety flags (<%= stats.safety.total_flags - stats.safety.reviewed_flags %>)</div>
+                    <a href="/admin/safety-flags?reviewed=false">View Unreviewed Flags</a>
+                </li>
+                <li class="activity-item">
+                    <div class="description">Monitor OCR processing failures</div>
+                    <a href="/admin/ocr-uploads?status=failed">View Failed Uploads</a>
+                </li>
+                <li class="activity-item">
+                    <div class="description">Check recent user registrations</div>
+                    <a href="/admin/users">View All Users</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh stats every 5 minutes
+        setInterval(async () => {
+            try {
+                const response = await fetch('/api/admin/dashboard/stats');
+                if (response.ok) {
+                    const newStats = await response.json();
+                    updateStats(newStats);
+                }
+            } catch (error) {
+                console.error('Failed to refresh stats:', error);
+            }
+        }, 300000);
+
+        function updateStats(stats) {
+            // Update stat values
+            document.querySelector('.stat-card:nth-child(1) .value').textContent = stats.users.total_users;
+            document.querySelector('.stat-card:nth-child(1) .subtext').textContent = `${stats.users.active_users} active in last 30 days`;
+            // Add more updates as needed
+        }
+    </script>
+</body>
+</html>

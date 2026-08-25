@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Career Assessment' %> - DCGS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .btn-back:hover {
+            color: var(--primary);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Main Layout */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-light);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+
+        /* Section Tabs */
+        .section-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-tab {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--card);
+            color: var(--text-light);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .section-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .section-tab.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .section-tab.completed {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        /* Question Card */
+        .question-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .question-number {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        /* Likert Scale */
+        .likert-scale {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .likert-option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .likert-option:hover {
+            border-color: var(--primary);
+            background: #f8fafc;
+        }
+
+        .likert-option.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .likert-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .likert-option.selected .likert-radio {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
+        .likert-option.selected .likert-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .likert-label {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .likert-value {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--border);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Intro Section */
+        .intro-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .intro-card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .intro-card p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .intro-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .intro-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 0.5rem;
+        }
+
+        .intro-feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .intro-feature-text {
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        /* Loading State */
+        .loading-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Results Preview */
+        .results-preview {
+            display: none;
+        }
+
+        .results-preview.active {
+            display: block;
+        }
+
+        /* RIASEC Hexagon */
+        .riasec-container {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .riasec-scores {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .riasec-score {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background: var(--bg);
+        }
+
+        .riasec-letter {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .riasec-name {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .riasec-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert.active {
+            display: flex;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 640px) {
+            .intro-features {
+                grid-template-columns: 1fr;
+            }
+
+            .riasec-scores {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .section-tabs {
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .nav-buttons {
+                flex-direction: column-reverse;
+                gap: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon">D</div>
+                DCGS
+            </a>
+            <div class="nav-right">
+                <a href="/dashboard" class="btn-back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Back to Dashboard
+                </a>
+                <div class="user-avatar" id="navAvatar">U</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h1>Career Assessment</h1>
+            <p>Discover your Holland Code and find your ideal career path.</p>
+        </div>
+
+        <!-- Info Alert -->
+        <div class="alert alert-info active" id="infoAlert">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Answer honestly—there are no wrong answers. This takes about 10-15 minutes.</span>
+        </div>
+
+        <!-- Intro Section -->
+        <div id="introSection" class="intro-card">
+            <h2>What is the RIASEC Assessment?</h2>
+            <p>The RIASEC model (also known as Holland Codes) identifies six personality types that match different career paths. Your results will help us recommend courses and careers that align with who you are.</p>
+
+            <div class="intro-features">
+                <div class="intro-feature">
+                    <div class="intro-feature-icon">🎯</div>
+                    <div class="intro-feature-text">Personalized Matches</div>
+                </div>
+                <div class="intro-feature">
+                    <div class="intro-feature-icon">📊</div>
+                    <div class="intro-feature-text">Career Insights</div>
+                </div>
+                <div class="intro-feature">
+                    <div class="intro-feature-icon">🎓</div>
+                    <div class="intro-feature-text">Course Guidance</div>
+                </div>
+                <div class="intro-feature">
+                    <div class="intro-feature-icon">✨</div>
+                    <div class="intro-feature-text">AI-Powered Analysis</div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="startAssessment()" style="width: 100%;">
+                Start Assessment
+            </button>
+        </div>
+
+        <!-- Assessment Section -->
+        <div id="assessmentSection" style="display: none;">
+            <!-- Progress -->
+            <div class="progress-container">
+                <div class="progress-header">
+                    <span class="progress-title">Your Progress</span>
+                    <span class="progress-text"><span id="currentQuestion">1</span> of <span id="totalQuestions">36</span></span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Section Tabs -->
+            <div class="section-tabs" id="sectionTabs">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Questions Container -->
+            <div id="questionsContainer">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Navigation -->
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>
+                    Previous
+                </button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>
+                    Next
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="loadingSection" style="display: none;">
+            <div class="loading-card">
+                <div class="loading-spinner"></div>
+                <h3>Analyzing Your Responses...</h3>
+                <p style="color: var(--text-light); margin-top: 0.5rem;">Our AI is generating your personalized career profile.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Assessment State
+        let assessmentId = null;
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let responses = {};
+        let categories = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Set avatar
+            const userData = <%- JSON.stringify(user || {}) %>;
+            document.getElementById('navAvatar').textContent =
+                (userData.first_name || userData.email || 'U')[0].toUpperCase();
+
+            // Check for existing assessment
+            await checkExistingAssessment();
+        });
+
+        // Check for existing assessment
+        async function checkExistingAssessment() {
+            try {
+                const response = await fetch('/api/assessment/status', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (data.data?.assessment) {
+                    const assessment = data.data.assessment;
+
+                    if (assessment.status === 'completed') {
+                        // Redirect to results
+                        window.location.href = '/assessment/results';
+                    } else if (assessment.status === 'in_progress') {
+                        // Resume assessment
+                        assessmentId = assessment.id;
+                        responses = assessment.responses || {};
+                        await loadQuestions();
+                        showAssessment();
+                        goToQuestion(assessment.progress > 0 ? Math.floor(assessment.progress / 100 * questions.length) : 0);
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking assessment:', error);
+            }
+        }
+
+        // Start new assessment
+        async function startAssessment() {
+            try {
+                const response = await fetch('/api/assessment/start', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    if (error.restricted) {
+                        alert(error.error);
+                        return;
+                    }
+                    throw new Error(error.error);
+                }
+
+                const data = await response.json();
+                assessmentId = data.data.assessmentId;
+
+                await loadQuestions();
+                showAssessment();
+                goToQuestion(0);
+            } catch (error) {
+                console.error('Error starting assessment:', error);
+                alert('Failed to start assessment. Please try again.');
+            }
+        }
+
+        // Load questions
+        async function loadQuestions() {
+            try {
+                const response = await fetch('/api/assessment/questions', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                categories = data.data.categories;
+
+                // Flatten questions
+                questions = [];
+                categories.forEach(cat => {
+                    data.data.questions[cat].forEach(q => {
+                        questions.push({ ...q, category: cat });
+                    });
+                });
+
+                document.getElementById('totalQuestions').textContent = questions.length;
+                renderSectionTabs();
+                renderQuestions();
+            } catch (error) {
+                console.error('Error loading questions:', error);
+            }
+        }
+
+        // Render section tabs
+        function renderSectionTabs() {
+            const container = document.getElementById('sectionTabs');
+            const categoryNames = {
+                'personality': 'Personality',
+                'skills': 'Skills',
+                'interests': 'Interests',
+                'values': 'Values',
+                'work_environment': 'Work Environment'
+            };
+
+            container.innerHTML = categories.map((cat, index) => {
+                const catQuestions = questions.filter(q => q.category === cat);
+                const answered = catQuestions.filter(q => responses[q.id]).length;
+                const isCompleted = answered === catQuestions.length;
+
+                return `<button class="section-tab ${isCompleted ? 'completed' : ''}" data-category="${cat}">
+                    ${categoryNames[cat] || cat} ${isCompleted ? '✓' : ''}
+                </button>`;
+            }).join('');
+        }
+
+        // Render questions
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+
+            container.innerHTML = questions.map((q, index) => `
+                <div class="question-card ${index === 0 ? 'active' : ''}" data-index="${index}" data-id="${q.id}">
+                    <div class="question-number">Question ${index + 1} of ${questions.length} • ${q.category}</div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="likert-scale">
+                        ${[1, 2, 3, 4, 5].map(val => `
+                            <div class="likert-option ${responses[q.id]?.answer === val ? 'selected' : ''}"
+                                 onclick="selectAnswer('${q.id}', ${val})"
+                                 data-value="${val}">
+                                <div class="likert-radio"></div>
+                                <div class="likert-label">${getLikertLabel(val)}</div>
+                                <div class="likert-value">${val}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get likert label
+        function getLikertLabel(value) {
+            const labels = {
+                1: 'Strongly Disagree',
+                2: 'Disagree',
+                3: 'Neutral',
+                4: 'Agree',
+                5: 'Strongly Agree'
+            };
+            return labels[value] || value;
+        }
+
+        // Show assessment section
+        function showAssessment() {
+            document.getElementById('introSection').style.display = 'none';
+            document.getElementById('assessmentSection').style.display = 'block';
+            document.getElementById('infoAlert').style.display = 'none';
+        }
+
+        // Select answer
+        async function selectAnswer(questionId, answer) {
+            // Update UI
+            const card = document.querySelector(`[data-id="${questionId}"]`);
+            card.querySelectorAll('.likert-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            card.querySelector(`[data-value="${answer}"]`).classList.add('selected');
+
+            // Store response locally
+            responses[questionId] = { answer };
+
+            // Enable next button
+            document.getElementById('nextBtn').disabled = false;
+
+            // Submit to server
+            try {
+                await fetch('/api/assessment/response', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        assessmentId,
+                        questionId,
+                        answer
+                    })
+                });
+            } catch (error) {
+                console.error('Error submitting response:', error);
+            }
+
+            // Update section tabs
+            renderSectionTabs();
+        }
+
+        // Navigate to question
+        function goToQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+
+            currentQuestionIndex = index;
+
+            // Hide all questions
+            document.querySelectorAll('.question-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Show current
+            const currentCard = document.querySelector(`[data-index="${index}"]`);
+            if (currentCard) {
+                currentCard.classList.add('active');
+            }
+
+            // Update progress
+            document.getElementById('currentQuestion').textContent = index + 1;
+            const progress = ((index + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+
+            // Update buttons
+            document.getElementById('prevBtn').disabled = index === 0;
+
+            const hasAnswer = responses[questions[index].id];
+            document.getElementById('nextBtn').disabled = !hasAnswer;
+            document.getElementById('nextBtn').textContent =
+                index === questions.length - 1 ? 'Complete' : 'Next';
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Next question
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                goToQuestion(currentQuestionIndex + 1);
+            } else {
+                completeAssessment();
+            }
+        }
+
+        // Previous question
+        function previousQuestion() {
+            goToQuestion(currentQuestionIndex - 1);
+        }
+
+        // Complete assessment
+        async function completeAssessment() {
+            document.getElementById('assessmentSection').style.display = 'none';
+            document.getElementById('loadingSection').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/assessment/complete', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ assessmentId })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to complete assessment');
+                }
+
+                // Redirect to results
+                window.location.href = '/assessment/results';
+            } catch (error) {
+                console.error('Error completing assessment:', error);
+                alert('Something went wrong. Please try again.');
+                document.getElementById('loadingSection').style.display = 'none';
+                document.getElementById('assessmentSection').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
